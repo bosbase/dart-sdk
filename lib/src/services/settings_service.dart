@@ -570,4 +570,130 @@ class SettingsService extends BaseService {
 
     return update(body: enrichedBody, query: query, headers: headers);
   }
+
+  // -------------------------------------------------------------------
+  // Log-Specific Helpers
+  // -------------------------------------------------------------------
+
+  /// Gets the current log settings configuration.
+  ///
+  /// This is a convenience method that returns log configuration,
+  /// matching what's shown on the logs settings panel.
+  ///
+  /// Returns object containing log configuration (maxDays, minLevel, logIP, logAuthId)
+  Future<Map<String, dynamic>> getLogSettings({
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final allSettings = await getAll(query: query, headers: headers);
+    return allSettings["logs"] as Map<String, dynamic>? ?? {};
+  }
+
+  /// Updates log settings configuration.
+  ///
+  /// This is a convenience method for managing log configuration:
+  /// - Maximum days to retain logs
+  /// - Minimum log level
+  /// - Whether to log IP addresses
+  /// - Whether to log authentication IDs
+  ///
+  /// Returns updated settings
+  Future<Map<String, dynamic>> updateLogSettings({
+    int? maxDays,
+    int? minLevel,
+    bool? logIP,
+    bool? logAuthId,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateLogs(
+      maxDays: maxDays,
+      minLevel: minLevel,
+      logIP: logIP,
+      logAuthId: logAuthId,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets the maximum number of days to retain logs.
+  ///
+  /// [maxDays] - Maximum days to retain logs (0 or greater)
+  /// Returns updated settings
+  Future<Map<String, dynamic>> setLogRetentionDays(
+    int maxDays, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateLogs(
+      maxDays: maxDays,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets the minimum log level.
+  ///
+  /// Log levels:
+  /// - Negative values: Debug/Info levels
+  /// - 0: Default/Warning level
+  /// - Positive values: Error levels
+  ///
+  /// Only logs at or above this level will be retained.
+  ///
+  /// [minLevel] - Minimum log level (-100 to 100)
+  /// Returns updated settings
+  Future<Map<String, dynamic>> setMinLogLevel(
+    int minLevel, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateLogs(
+      minLevel: minLevel,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Enables or disables IP address logging.
+  ///
+  /// [enabled] - Whether to log IP addresses
+  /// Returns updated settings
+  Future<Map<String, dynamic>> setLogIPAddresses(
+    bool enabled, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateLogs(
+      logIP: enabled,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Enables or disables authentication ID logging.
+  ///
+  /// [enabled] - Whether to log authentication IDs
+  /// Returns updated settings
+  Future<Map<String, dynamic>> setLogAuthIds(
+    bool enabled, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateLogs(
+      logAuthId: enabled,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
 }
