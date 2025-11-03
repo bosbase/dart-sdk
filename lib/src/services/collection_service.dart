@@ -17,6 +17,30 @@ class CollectionService extends BaseCrudService<CollectionModel> {
   CollectionModel itemFactoryFunc(Map<String, dynamic> json) =>
       CollectionModel.fromJson(json);
 
+  /// Deletes a collection (table) by its id or name.
+  ///
+  /// This is a convenience method that wraps the inherited [delete] method
+  /// to make collection deletion explicit.
+  ///
+  /// **Warning**: This operation is destructive and will delete the collection
+  /// along with all its records and associated data.
+  ///
+  /// [collectionIdOrName] - Collection id or name to delete
+  /// Returns true if deletion succeeds
+  Future<void> deleteCollection(
+    String collectionIdOrName, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return delete(
+      collectionIdOrName,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
   /// Imports the provided collections.
   ///
   /// If [deleteMissing] is `true`, all local collections and schema fields,
@@ -66,6 +90,127 @@ class CollectionService extends BaseCrudService<CollectionModel> {
 
       return result;
     });
+  }
+
+  /// Creates a new collection from a scaffold template.
+  ///
+  /// This is a convenience method that fetches the scaffold for the specified type
+  /// and creates a new collection with the given name, using the scaffold as a base.
+  ///
+  /// [type] - Collection type: "base", "auth", or "view"
+  /// [name] - Collection name
+  /// [overrides] - Optional properties to override in the scaffold
+  /// Returns created collection model
+  Future<CollectionModel> createFromScaffold(
+    String type,
+    String name, {
+    Map<String, dynamic>? overrides,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final scaffolds = await getScaffolds(query: query, headers: headers);
+    final scaffold = scaffolds[type];
+
+    if (scaffold == null) {
+      throw ArgumentError('Scaffold for type "$type" not found');
+    }
+
+    // Create collection based on scaffold with overrides
+    final scaffoldJson = scaffold.toJson();
+    final collectionData = Map<String, dynamic>.from(scaffoldJson);
+    collectionData["name"] = name;
+    if (overrides != null) {
+      collectionData.addAll(overrides);
+    }
+
+    final collection = CollectionModel.fromJson(collectionData);
+
+    return create(
+      collection,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Creates a new base collection.
+  ///
+  /// Convenience method for creating a base collection type.
+  ///
+  /// [name] - Collection name
+  /// [overrides] - Optional properties to override
+  /// Returns created collection model
+  Future<CollectionModel> createBase(
+    String name, {
+    Map<String, dynamic>? overrides,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return createFromScaffold(
+      "base",
+      name,
+      overrides: overrides,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Creates a new auth collection.
+  ///
+  /// Convenience method for creating an auth collection type.
+  ///
+  /// [name] - Collection name
+  /// [overrides] - Optional properties to override
+  /// Returns created collection model
+  Future<CollectionModel> createAuth(
+    String name, {
+    Map<String, dynamic>? overrides,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return createFromScaffold(
+      "auth",
+      name,
+      overrides: overrides,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Creates a new view collection.
+  ///
+  /// Convenience method for creating a view collection type.
+  ///
+  /// [name] - Collection name
+  /// [viewQuery] - SQL query for the view (required for view collections)
+  /// [overrides] - Optional properties to override
+  /// Returns created collection model
+  Future<CollectionModel> createView(
+    String name, {
+    String? viewQuery,
+    Map<String, dynamic>? overrides,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final scaffoldOverrides = Map<String, dynamic>.from(overrides ?? {});
+    if (viewQuery != null) {
+      scaffoldOverrides["viewQuery"] = viewQuery;
+    }
+
+    return createFromScaffold(
+      "view",
+      name,
+      overrides: scaffoldOverrides.isEmpty ? null : scaffoldOverrides,
+      body: body,
+      query: query,
+      headers: headers,
+    );
   }
 
   /// Deletes all records associated with the specified collection.
@@ -311,11 +456,17 @@ class CollectionService extends BaseCrudService<CollectionModel> {
     );
   }
 
-  /// Removes a field from the collection.
+  /// Removes a field from the collection (deletes a table field).
+  ///
+  /// This method removes a field from the collection schema and automatically
+  /// removes any indexes that reference the deleted field.
+  ///
+  /// **Note**: System fields cannot be removed.
   ///
   /// [collectionIdOrName] - Collection id or name
   /// [fieldName] - Name of the field to remove
   /// Returns the updated collection model
+  /// Throws [ArgumentError] if field not found or if attempting to remove a system field
   Future<CollectionModel> removeField(
     String collectionIdOrName,
     String fieldName, {
@@ -431,11 +582,15 @@ class CollectionService extends BaseCrudService<CollectionModel> {
     );
   }
 
-  /// Removes an index from the collection.
+  /// Removes an index from the collection (deletes a table index).
+  ///
+  /// This method removes an index that contains all the specified columns.
+  /// The index is identified by matching all provided column names.
   ///
   /// [collectionIdOrName] - Collection id or name
   /// [columns] - List of column names that identify the index to remove
   /// Returns the updated collection model
+  /// Throws [ArgumentError] if index not found
   Future<CollectionModel> removeIndex(
     String collectionIdOrName,
     List<String> columns, {
