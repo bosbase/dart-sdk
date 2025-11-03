@@ -154,6 +154,57 @@ class SettingsService extends BaseService {
     return update(body: enrichedBody, query: query, headers: headers);
   }
 
+  // -------------------------------------------------------------------
+  // Application Configuration Helpers (Meta + TrustedProxy + RateLimits + Batch)
+  // -------------------------------------------------------------------
+
+  /// Gets the current application configuration settings.
+  ///
+  /// This is a convenience method that returns all application configuration,
+  /// matching what's shown on the application settings page (`/_/#/settings`):
+  /// - Meta settings (app name, URL, hideControls)
+  /// - TrustedProxy settings
+  /// - RateLimits settings
+  /// - Batch settings
+  ///
+  /// Returns object containing application configuration
+  Future<Map<String, dynamic>> getApplicationSettings({
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final allSettings = await getAll(query: query, headers: headers);
+    return {
+      "meta": allSettings["meta"],
+      "trustedProxy": allSettings["trustedProxy"],
+      "rateLimits": allSettings["rateLimits"],
+      "batch": allSettings["batch"],
+    };
+  }
+
+  /// Updates application configuration settings.
+  ///
+  /// This is a convenience method for managing all application configuration
+  /// categories at once (meta, trustedProxy, rateLimits, batch).
+  ///
+  /// Returns updated settings
+  Future<Map<String, dynamic>> updateApplicationSettings({
+    Map<String, dynamic>? meta,
+    Map<String, dynamic>? trustedProxy,
+    Map<String, dynamic>? rateLimits,
+    Map<String, dynamic>? batch,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+    if (meta != null) enrichedBody["meta"] = meta;
+    if (trustedProxy != null) enrichedBody["trustedProxy"] = trustedProxy;
+    if (rateLimits != null) enrichedBody["rateLimits"] = rateLimits;
+    if (batch != null) enrichedBody["batch"] = batch;
+
+    return update(body: enrichedBody, query: query, headers: headers);
+  }
+
   /// Updates the SMTP email configuration.
   ///
   /// Returns updated settings
