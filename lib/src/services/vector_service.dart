@@ -71,7 +71,7 @@ class VectorService extends BaseService {
     Map<String, dynamic> query = const {},
     Map<String, String> headers = const {},
   }) async {
-    final path = "${_getPath(collection)}/batch";
+    final path = "${_getPath(collection)}/documents/batch";
     return client.send<Map<String, dynamic>>(
       path,
       method: "POST",
@@ -153,7 +153,7 @@ class VectorService extends BaseService {
     Map<String, dynamic> query = const {},
     Map<String, String> headers = const {},
   }) async {
-    final path = "${_getPath(collection)}/search";
+    final path = "${_getPath(collection)}/documents/search";
     return client.send<Map<String, dynamic>>(
       path,
       method: "POST",
