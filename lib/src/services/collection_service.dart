@@ -85,6 +85,134 @@ class CollectionService extends BaseCrudService<CollectionModel> {
   }
 
   // -------------------------------------------------------------------
+  // Export/Import Helpers
+  // -------------------------------------------------------------------
+
+  /// Exports collections in a format suitable for import.
+  ///
+  /// This method fetches all collections and prepares them for export by:
+  /// - Removing timestamps (created, updated)
+  /// - Removing OAuth2 providers (for cleaner export)
+  ///
+  /// The returned collections can be saved as JSON and later imported.
+  ///
+  /// [filterCollections] - Optional function to filter which collections to export (by default exports all)
+  /// Returns array of collection models ready for export
+  Future<List<CollectionModel>> exportCollections({
+    bool Function(CollectionModel)? filterCollections,
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collections = await getFullList(
+      query: query,
+      headers: headers,
+    );
+
+    // Filter if a filter function is provided
+    var filtered = filterCollections != null
+        ? collections.where(filterCollections).toList()
+        : collections;
+
+    // Clean collections for export (matching UI behavior)
+    return filtered.map((collection) {
+      final json = collection.toJson();
+      
+      // Remove timestamps
+      json.remove("created");
+      json.remove("updated");
+      
+      // Remove OAuth2 providers
+      if (json.containsKey("oauth2") && json["oauth2"] is Map) {
+        final oauth2Data = json["oauth2"] as Map<String, dynamic>;
+        if (oauth2Data.containsKey("providers")) {
+          oauth2Data.remove("providers");
+        }
+      }
+      
+      return CollectionModel.fromJson(json);
+    }).toList();
+  }
+
+  /// Normalizes collections data for import.
+  ///
+  /// This helper method prepares collections data by:
+  /// - Removing timestamps (created, updated)
+  /// - Removing duplicate collections by id
+  /// - Removing duplicate fields within each collection
+  ///
+  /// Use this before calling import() to ensure clean data.
+  ///
+  /// [collections] - List of collection models to normalize
+  /// Returns normalized list of collections ready for import
+  List<CollectionModel> normalizeForImport(List<CollectionModel> collections) {
+    // Remove duplicates by id
+    final seenIds = <String>{};
+    final uniqueCollections = collections.where((collection) {
+      if (collection.id.isNotEmpty && seenIds.contains(collection.id)) {
+        return false;
+      }
+      if (collection.id.isNotEmpty) {
+        seenIds.add(collection.id);
+      }
+      return true;
+    }).toList();
+
+    // Normalize each collection
+    return uniqueCollections.map((collection) {
+      final normalized = CollectionModel.fromJson(collection.toJson());
+      
+      // Remove timestamps
+      normalized.created = "";
+      normalized.updated = "";
+      
+      // Remove duplicate fields by id
+      if (normalized.fields.isNotEmpty) {
+        final seenFieldIds = <String>{};
+        normalized.fields = normalized.fields.where((field) {
+          if (field.id.isNotEmpty && seenFieldIds.contains(field.id)) {
+            return false;
+          }
+          if (field.id.isNotEmpty) {
+            seenFieldIds.add(field.id);
+          }
+          return true;
+        }).toList();
+      }
+      
+      return normalized;
+    }).toList();
+  }
+
+  /// Imports the provided collections.
+  ///
+  /// If [deleteMissing] is `true`, all local collections and schema fields,
+  /// that are not present in the imported configuration, WILL BE DELETED
+  /// (including their related records data)!
+  ///
+  /// **Warning**: This operation is destructive when [deleteMissing] is true.
+  /// It's recommended to call [normalizeForImport] on the collections
+  /// before importing to ensure clean data.
+  Future<void> import(
+    List<CollectionModel> collections, {
+    bool deleteMissing = false,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+    enrichedBody["collections"] = collections;
+    enrichedBody["deleteMissing"] = deleteMissing;
+
+    return client.send(
+      "$baseCrudPath/import",
+      method: "PUT",
+      body: enrichedBody,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  // -------------------------------------------------------------------
   // Field Management Helpers
   // -------------------------------------------------------------------
 

@@ -389,6 +389,104 @@ class SettingsService extends BaseService {
     return update(body: enrichedBody, query: query, headers: headers);
   }
 
+  // -------------------------------------------------------------------
+  // Backup-Specific Helpers (Auto-Backup + S3 Storage)
+  // -------------------------------------------------------------------
+
+  /// Gets the current backup settings (auto-backup schedule and S3 storage configuration).
+  ///
+  /// This is a convenience method that returns backup configuration,
+  /// matching what's shown on the backups settings page.
+  ///
+  /// Returns object containing backup configuration (cron, cronMaxKeep, s3)
+  Future<Map<String, dynamic>> getBackupSettings({
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final allSettings = await getAll(query: query, headers: headers);
+    return allSettings["backups"] as Map<String, dynamic>? ?? {};
+  }
+
+  /// Updates backup settings (auto-backup schedule and S3 storage configuration).
+  ///
+  /// This is a convenience method for managing backup configuration:
+  /// - Auto-backup cron schedule (leave empty to disable)
+  /// - Maximum number of backups to keep
+  /// - S3 storage configuration for backups
+  ///
+  /// Returns updated settings
+  Future<Map<String, dynamic>> updateBackupSettings({
+    String? cron,
+    int? cronMaxKeep,
+    Map<String, dynamic>? s3,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateBackups(
+      cron: cron,
+      cronMaxKeep: cronMaxKeep,
+      s3: s3,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets the auto-backup cron schedule.
+  ///
+  /// [cron] - Cron expression (e.g., "0 0 * * *" for daily). Use empty string to disable.
+  /// [cronMaxKeep] - Maximum number of backups to keep (required if cron is set)
+  /// Returns updated settings
+  Future<Map<String, dynamic>> setAutoBackupSchedule(
+    String cron, {
+    int? cronMaxKeep,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateBackups(
+      cron: cron.isEmpty ? "" : cron,
+      cronMaxKeep: cronMaxKeep,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Disables auto-backup (removes cron schedule).
+  ///
+  /// Returns updated settings
+  Future<Map<String, dynamic>> disableAutoBackup({
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateBackups(
+      cron: "",
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Tests the S3 backups connection.
+  ///
+  /// This is a convenience method that tests the "backups" filesystem,
+  /// equivalent to calling testS3(filesystem: "backups").
+  Future<void> testBackupsS3({
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return testS3(
+      filesystem: "backups",
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
   /// Updates the Batch request configuration.
   ///
   /// Returns updated settings
