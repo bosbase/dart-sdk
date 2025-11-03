@@ -214,6 +214,72 @@ class SettingsService extends BaseService {
     return update(body: enrichedBody, query: query, headers: headers);
   }
 
+  // -------------------------------------------------------------------
+  // Storage-Specific Helpers (S3 File Storage)
+  // -------------------------------------------------------------------
+
+  /// Gets the current S3 storage configuration.
+  ///
+  /// This is a convenience method specifically for file storage S3 configuration,
+  /// equivalent to calling getCategory("s3").
+  ///
+  /// Returns the S3 storage configuration object or null if not found
+  Future<Map<String, dynamic>?> getStorageS3({
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return getCategory("s3", query: query, headers: headers);
+  }
+
+  /// Updates the S3 storage configuration for file storage.
+  ///
+  /// This is a convenience method specifically for file storage S3 configuration,
+  /// equivalent to calling updateS3().
+  ///
+  /// Returns updated settings
+  Future<Map<String, dynamic>> updateStorageS3({
+    bool? enabled,
+    String? bucket,
+    String? region,
+    String? endpoint,
+    String? accessKey,
+    String? secret,
+    bool? forcePathStyle,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return updateS3(
+      enabled: enabled,
+      bucket: bucket,
+      region: region,
+      endpoint: endpoint,
+      accessKey: accessKey,
+      secret: secret,
+      forcePathStyle: forcePathStyle,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Tests the S3 storage connection for file storage.
+  ///
+  /// This is a convenience method that tests the "storage" filesystem,
+  /// equivalent to calling testS3(filesystem: "storage").
+  Future<void> testStorageS3({
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return testS3(
+      filesystem: "storage",
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
   /// Updates the Backups configuration (scheduling and S3 storage).
   ///
   /// Returns updated settings
