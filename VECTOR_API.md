@@ -112,6 +112,35 @@ for (final collection in collections) {
 }
 ```
 
+### Update Collection
+
+Update a vector collection configuration (distance metric and options).
+Note: Collection name and dimension cannot be changed after creation.
+
+```dart
+await pb.vectors.updateCollection(
+  'documents',
+  VectorCollectionConfig(
+    distance: 'l2',  // Change from cosine to L2
+  ),
+);
+
+// Update with options
+await pb.vectors.updateCollection(
+  'documents',
+  VectorCollectionConfig(
+    distance: 'inner_product',
+    options: {'customOption': 'value'},
+  ),
+);
+```
+
+**Parameters:**
+- `name` (String): Collection name
+- `config` (VectorCollectionConfig):
+  - `distance` (String?, optional): Distance metric to update. Options: 'cosine', 'l2', 'inner_product'
+  - `options` (Map<String, dynamic>?, optional): Custom collection options
+
 ### Delete Collection
 
 Delete a vector collection and all its data.

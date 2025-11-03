@@ -213,7 +213,7 @@ class VectorBatchInsertResponse {
   Map<String, dynamic> toJson() => _$VectorBatchInsertResponseToJson(this);
 }
 
-/// Configuration for creating a vector collection.
+/// Configuration for creating or updating a vector collection.
 @JsonSerializable()
 class VectorCollectionConfig {
   /// Vector dimension
@@ -224,9 +224,14 @@ class VectorCollectionConfig {
   @JsonKey(name: "distance")
   String? distance;
 
+  /// Optional collection configuration options
+  @JsonKey(name: "options")
+  Map<String, dynamic>? options;
+
   VectorCollectionConfig({
     this.dimension,
     this.distance,
+    this.options,
   });
 
   factory VectorCollectionConfig.fromJson(Map<String, dynamic> json) =>

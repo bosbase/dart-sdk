@@ -239,6 +239,32 @@ class VectorService extends BaseService {
     );
   }
 
+  /// Update a vector collection configuration (distance metric and options).
+  /// Note: Collection name and dimension cannot be changed after creation.
+  ///
+  /// Example:
+  /// ```dart
+  /// await pb.vectors.updateCollection(
+  ///   'documents',
+  ///   VectorCollectionConfig(distance: 'l2'),  // Change from cosine to L2
+  /// );
+  /// ```
+  Future<void> updateCollection(
+    String name,
+    VectorCollectionConfig config, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final path = "$baseVectorPath/collections/${Uri.encodeComponent(name)}";
+    return client.send(
+      path,
+      method: "PATCH",
+      body: config.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
   /// Delete a vector collection/table.
   ///
   /// Example:
