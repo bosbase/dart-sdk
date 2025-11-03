@@ -384,6 +384,8 @@ If that's  not feasible, you can always fallback to the "Manual code exchange" O
 
 #### CollectionService ([Detailed class reference](https://pub.dev/documentation/bosbase/latest/bosbase/CollectionService-class.html), [API docs](https://bosbase.io/docs/api-collections))
 
+> 📖 **API Rules Documentation**: See [docs/api-rules.md](./docs/api-rules.md) for comprehensive guide on managing API rules, filter syntax, and examples.
+
 ```dart
 // Returns a paginated collections list.
 🔐 pb.collections.getList({page = 1, perPage = 30, filter?, sort?, query, headers});
@@ -414,6 +416,37 @@ If that's  not feasible, you can always fallback to the "Manual code exchange" O
 
 // Returns type indexed map with scaffolded collection models populated with their default field values.
 🔐 pb.collections.getScaffolds({query, body, headers});
+
+// Collection creation from scaffolds
+🔐 pb.collections.createFromScaffold(type, name, {overrides?, query, body, headers});
+🔐 pb.collections.createBase(name, {overrides?, query, body, headers});
+🔐 pb.collections.createAuth(name, {overrides?, query, body, headers});
+🔐 pb.collections.createView(name, {viewQuery?, overrides?, query, body, headers});
+
+// Field management
+🔐 pb.collections.addField(collectionIdOrName, field, {query, headers});
+🔐 pb.collections.updateField(collectionIdOrName, fieldName, updates, {query, headers});
+🔐 pb.collections.removeField(collectionIdOrName, fieldName, {query, headers});
+🔐 pb.collections.getField(collectionIdOrName, fieldName, {query, headers});
+
+// Index management
+🔐 pb.collections.addIndex(collectionIdOrName, columns, {unique?, indexName?, query, headers});
+🔐 pb.collections.removeIndex(collectionIdOrName, columns, {query, headers});
+🔐 pb.collections.getIndexes(collectionIdOrName, {query, headers});
+
+// API Rules management
+🔐 pb.collections.setListRule(collectionIdOrName, rule, {query, headers});
+🔐 pb.collections.setViewRule(collectionIdOrName, rule, {query, headers});
+🔐 pb.collections.setCreateRule(collectionIdOrName, rule, {query, headers});
+🔐 pb.collections.setUpdateRule(collectionIdOrName, rule, {query, headers});
+🔐 pb.collections.setDeleteRule(collectionIdOrName, rule, {query, headers});
+🔐 pb.collections.setRules(collectionIdOrName, {listRule?, viewRule?, createRule?, updateRule?, deleteRule?, query, headers});  // Set all rules at once
+🔐 pb.collections.getRules(collectionIdOrName, {query, headers});  // Get all rules
+🔐 pb.collections.setManageRule(collectionIdOrName, rule, {query, headers});  // Auth collections only
+🔐 pb.collections.setAuthRule(collectionIdOrName, rule, {query, headers});  // Auth collections only
+
+// Collection deletion
+🔐 pb.collections.deleteCollection(collectionIdOrName, {query, body, headers});  // Alias for delete()
 ```
 
 ---

@@ -648,8 +648,22 @@ class CollectionService extends BaseCrudService<CollectionModel> {
 
   /// Sets the list rule (read/list access rule) for the collection.
   ///
+  /// API Rules are collection access controls and data filters. Each rule can be:
+  /// - `null` (locked) - Only superusers can perform the action (default)
+  /// - `""` (empty string) - Anyone can perform the action
+  /// - Non-empty string - Only users satisfying the filter expression can perform the action
+  ///
+  /// Rules support filter syntax with operators (=, !=, >, <, ~, etc.), macros (@now, @request.auth.id, etc.),
+  /// and modifiers (:isset, :length, :each, :lower).
+  ///
+  /// Examples:
+  /// - Allow only registered users: `"@request.auth.id != \"\""`
+  /// - Filter by status: `"status = \"active\""`
+  /// - Combine conditions: `"@request.auth.id != \"\" && (status = \"active\" || status = \"pending\")"`
+  /// - Filter by relation: `"@request.auth.id != \"\" && author.id ?= @request.auth.id"`
+  ///
   /// [collectionIdOrName] - Collection id or name
-  /// [rule] - Rule expression (use null or empty string to remove)
+  /// [rule] - Rule expression (use null, empty string, or "" to allow anyone; use non-empty string for filter)
   /// Returns the updated collection model
   Future<CollectionModel> setListRule(
     String collectionIdOrName,
@@ -669,8 +683,10 @@ class CollectionService extends BaseCrudService<CollectionModel> {
 
   /// Sets the view rule (read/view access rule) for the collection.
   ///
+  /// See [setListRule] for details on rule syntax and examples.
+  ///
   /// [collectionIdOrName] - Collection id or name
-  /// [rule] - Rule expression (use null or empty string to remove)
+  /// [rule] - Rule expression (use null, empty string, or "" to allow anyone; use non-empty string for filter)
   /// Returns the updated collection model
   Future<CollectionModel> setViewRule(
     String collectionIdOrName,
@@ -690,8 +706,10 @@ class CollectionService extends BaseCrudService<CollectionModel> {
 
   /// Sets the create rule for the collection.
   ///
+  /// See [setListRule] for details on rule syntax and examples.
+  ///
   /// [collectionIdOrName] - Collection id or name
-  /// [rule] - Rule expression (use null or empty string to remove)
+  /// [rule] - Rule expression (use null, empty string, or "" to allow anyone; use non-empty string for filter)
   /// Returns the updated collection model
   Future<CollectionModel> setCreateRule(
     String collectionIdOrName,
@@ -711,8 +729,10 @@ class CollectionService extends BaseCrudService<CollectionModel> {
 
   /// Sets the update rule for the collection.
   ///
+  /// See [setListRule] for details on rule syntax and examples.
+  ///
   /// [collectionIdOrName] - Collection id or name
-  /// [rule] - Rule expression (use null or empty string to remove)
+  /// [rule] - Rule expression (use null, empty string, or "" to allow anyone; use non-empty string for filter)
   /// Returns the updated collection model
   Future<CollectionModel> setUpdateRule(
     String collectionIdOrName,
@@ -732,8 +752,10 @@ class CollectionService extends BaseCrudService<CollectionModel> {
 
   /// Sets the delete rule for the collection.
   ///
+  /// See [setListRule] for details on rule syntax and examples.
+  ///
   /// [collectionIdOrName] - Collection id or name
-  /// [rule] - Rule expression (use null or empty string to remove)
+  /// [rule] - Rule expression (use null, empty string, or "" to allow anyone; use non-empty string for filter)
   /// Returns the updated collection model
   Future<CollectionModel> setDeleteRule(
     String collectionIdOrName,
@@ -743,6 +765,139 @@ class CollectionService extends BaseCrudService<CollectionModel> {
   }) async {
     final collection = await getOne(collectionIdOrName, query: query, headers: headers);
     collection.deleteRule = rule?.isEmpty ?? true ? null : rule;
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets all API rules at once for the collection.
+  ///
+  /// This is a convenience method to update multiple rules in a single operation.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [rules] - Map containing rule expressions (listRule, viewRule, createRule, updateRule, deleteRule)
+  /// Returns the updated collection model
+  Future<CollectionModel> setRules(
+    String collectionIdOrName, {
+    String? listRule,
+    String? viewRule,
+    String? createRule,
+    String? updateRule,
+    String? deleteRule,
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (listRule != null) {
+      collection.listRule = listRule.isEmpty ? null : listRule;
+    }
+    if (viewRule != null) {
+      collection.viewRule = viewRule.isEmpty ? null : viewRule;
+    }
+    if (createRule != null) {
+      collection.createRule = createRule.isEmpty ? null : createRule;
+    }
+    if (updateRule != null) {
+      collection.updateRule = updateRule.isEmpty ? null : updateRule;
+    }
+    if (deleteRule != null) {
+      collection.deleteRule = deleteRule.isEmpty ? null : deleteRule;
+    }
+
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Gets all API rules for the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// Returns map containing all rules (listRule, viewRule, createRule, updateRule, deleteRule)
+  Future<Map<String, String?>> getRules(
+    String collectionIdOrName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+    return {
+      "listRule": collection.listRule,
+      "viewRule": collection.viewRule,
+      "createRule": collection.createRule,
+      "updateRule": collection.updateRule,
+      "deleteRule": collection.deleteRule,
+    };
+  }
+
+  /// Sets the manage rule for an auth collection.
+  ///
+  /// ManageRule gives admin-like permissions to allow fully managing auth record(s),
+  /// e.g. changing password without requiring the old one, directly updating verified state and email, etc.
+  /// This rule is executed in addition to the Create and Update API rules.
+  ///
+  /// Only available for auth collections (type == "auth").
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// [rule] - Rule expression (use null to remove; empty string is not allowed for manageRule)
+  /// Returns the updated collection model
+  /// Throws [ArgumentError] if collection is not an auth collection
+  Future<CollectionModel> setManageRule(
+    String collectionIdOrName,
+    String? rule, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("ManageRule is only available for auth collections");
+    }
+
+    collection.manageRule = rule?.isEmpty ?? true ? null : rule;
+
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets the auth rule for an auth collection.
+  ///
+  /// AuthRule specifies additional record constraints applied after record authentication
+  /// and right before returning the auth token response to the client.
+  /// For example, to allow only verified users: `"verified = true"`
+  ///
+  /// Set to empty string to allow any Auth collection record to authenticate.
+  /// Set to null to disallow authentication altogether for the collection.
+  ///
+  /// Only available for auth collections (type == "auth").
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// [rule] - Rule expression (use null to disallow auth; empty string to allow all; non-empty for filter)
+  /// Returns the updated collection model
+  /// Throws [ArgumentError] if collection is not an auth collection
+  Future<CollectionModel> setAuthRule(
+    String collectionIdOrName,
+    String? rule, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("AuthRule is only available for auth collections");
+    }
+
+    collection.authRule = rule?.isEmpty ?? true ? null : rule;
+
     return update(
       collectionIdOrName,
       body: collection.toJson(),
