@@ -563,6 +563,46 @@ pb.realtime.onDisconnect = (subscriptions) { ... }
 
 ---
 
+#### VectorService ([Detailed class reference](https://pub.dev/documentation/bosbase/latest/bosbase/VectorService-class.html), [Vector API docs](./VECTOR_API.md))
+
+> Vector database operations for semantic search, RAG, and AI applications.
+
+```dart
+// Create a vector collection
+🔐 pb.vectors.createCollection(name, config, {query, headers});
+
+// List all vector collections
+🔐 pb.vectors.listCollections({query, headers});
+
+// Delete a vector collection
+🔐 pb.vectors.deleteCollection(name, {query, body, headers});
+
+// Insert a single vector document
+🔐 pb.vectors.insert(document, {collection?, query, headers});
+
+// Insert multiple vector documents in a batch
+🔐 pb.vectors.batchInsert(options, {collection?, query, headers});
+
+// Get a vector document by ID
+🔐 pb.vectors.get(id, {collection?, query, headers});
+
+// Update an existing vector document
+🔐 pb.vectors.update(id, document, {collection?, query, headers});
+
+// Delete a vector document
+🔐 pb.vectors.delete(id, {collection?, query, body, headers});
+
+// List vector documents (with pagination)
+🔐 pb.vectors.list({collection?, page?, perPage?, query, headers});
+
+// Search for similar vectors
+🔐 pb.vectors.search(options, {collection?, query, headers});
+```
+
+> 📖 **Vector Database Documentation**: See [VECTOR_API.md](./VECTOR_API.md) for comprehensive vector operations guide, examples, and best practices.
+
+---
+
 #### BatchService ([Detailed class reference](https://pub.dev/documentation/bosbase/latest/bosbase/BatchService-class.html), [API docs](https://bosbase.io/docs/api-bach))
 
 ```dart

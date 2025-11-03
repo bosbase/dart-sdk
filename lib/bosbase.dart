@@ -37,6 +37,7 @@ export "src/dtos/record_model.dart";
 export "src/dtos/record_subscription_event.dart";
 export "src/dtos/result_list.dart";
 export "src/dtos/token_config.dart";
+export "src/dtos/vector_document.dart";
 
 // services (exported mainly for dartdoc - https://github.com/dart-lang/dartdoc/issues/2154)
 export "src/services/backup_service.dart";
@@ -50,3 +51,4 @@ export "src/services/log_service.dart";
 export "src/services/realtime_service.dart";
 export "src/services/record_service.dart";
 export "src/services/settings_service.dart";
+export "src/services/vector_service.dart";
