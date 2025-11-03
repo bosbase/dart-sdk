@@ -1,4 +1,5 @@
 import "../client.dart";
+import "../dtos/collection_field.dart";
 import "../dtos/collection_model.dart";
 import "base_crud_service.dart";
 
@@ -78,6 +79,390 @@ class CollectionService extends BaseCrudService<CollectionModel> {
       "$baseCrudPath/${Uri.encodeComponent(collectionIdOrName)}/truncate",
       method: "DELETE",
       body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  // -------------------------------------------------------------------
+  // Field Management Helpers
+  // -------------------------------------------------------------------
+
+  /// Adds a new field to the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [field] - Field definition (at minimum: name and type)
+  /// Returns the updated collection model
+  Future<CollectionModel> addField(
+    String collectionIdOrName,
+    Map<String, dynamic> field, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (field["name"] == null || field["type"] == null) {
+      throw ArgumentError("Field name and type are required");
+    }
+
+    final fieldName = field["name"] as String;
+
+    // Check if field with this name already exists
+    if (collection.fields.any((f) => f.name == fieldName)) {
+      throw ArgumentError('Field with name "$fieldName" already exists');
+    }
+
+    // Initialize field with defaults
+    final newFieldData = <String, dynamic>{
+      "id": "",
+      "name": fieldName,
+      "type": field["type"],
+      "system": false,
+      "hidden": false,
+      "presentable": false,
+      "required": false,
+      ...field,
+    };
+
+    final newField = CollectionField(newFieldData);
+    collection.fields.add(newField);
+
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Updates an existing field in the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [fieldName] - Name of the field to update
+  /// [updates] - Field updates to apply
+  /// Returns the updated collection model
+  Future<CollectionModel> updateField(
+    String collectionIdOrName,
+    String fieldName,
+    Map<String, dynamic> updates, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    final fieldIndex = collection.fields.indexWhere((f) => f.name == fieldName);
+    if (fieldIndex == -1) {
+      throw ArgumentError('Field with name "$fieldName" not found');
+    }
+
+    final field = collection.fields[fieldIndex];
+
+    // Don't allow changing system fields
+    if (field.system && (updates.containsKey("type") || updates.containsKey("name"))) {
+      throw ArgumentError("Cannot modify system fields");
+    }
+
+    // If renaming, check for name conflicts
+    if (updates.containsKey("name") && updates["name"] != fieldName) {
+      final newName = updates["name"] as String;
+      if (collection.fields.any((f) => f.name == newName && f.name != fieldName)) {
+        throw ArgumentError('Field with name "$newName" already exists');
+      }
+    }
+
+    // Apply updates
+    final updatedFieldData = Map<String, dynamic>.from(field.data);
+    updatedFieldData.addAll(updates);
+    collection.fields[fieldIndex] = CollectionField(updatedFieldData);
+
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Removes a field from the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [fieldName] - Name of the field to remove
+  /// Returns the updated collection model
+  Future<CollectionModel> removeField(
+    String collectionIdOrName,
+    String fieldName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    final fieldIndex = collection.fields.indexWhere((f) => f.name == fieldName);
+    if (fieldIndex == -1) {
+      throw ArgumentError('Field with name "$fieldName" not found');
+    }
+
+    final field = collection.fields[fieldIndex];
+
+    // Don't allow removing system fields
+    if (field.system) {
+      throw ArgumentError("Cannot remove system fields");
+    }
+
+    // Remove the field
+    collection.fields.removeAt(fieldIndex);
+
+    // Remove indexes that reference this field
+    collection.indexes = collection.indexes.where((idx) {
+      // Parse index string to check if it contains this field
+      // Index format is typically like: "CREATE INDEX idx_name ON table_name (column1, column2)"
+      return !idx.contains("($fieldName)") &&
+          !idx.contains("($fieldName,") &&
+          !idx.contains(", $fieldName)") &&
+          !idx.contains("\`$fieldName\`");
+    }).toList();
+
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Gets a field by name from the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [fieldName] - Name of the field to retrieve
+  /// Returns the field object or null if not found
+  Future<CollectionField?> getField(
+    String collectionIdOrName,
+    String fieldName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+    try {
+      return collection.fields.firstWhere((f) => f.name == fieldName);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // Index Management Helpers
+  // -------------------------------------------------------------------
+
+  /// Adds an index to the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [columns] - List of column names to index
+  /// [unique] - Whether the index should be unique (default: false)
+  /// [indexName] - Optional custom index name
+  /// Returns the updated collection model
+  Future<CollectionModel> addIndex(
+    String collectionIdOrName,
+    List<String> columns, {
+    bool unique = false,
+    String? indexName,
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (columns.isEmpty) {
+      throw ArgumentError("At least one column must be specified");
+    }
+
+    // Validate that all columns exist
+    final fieldNames = collection.fields.map((f) => f.name).toList();
+    for (final column in columns) {
+      if (column != "id" && !fieldNames.contains(column)) {
+        throw ArgumentError('Field "$column" does not exist in the collection');
+      }
+    }
+
+    // Generate index name if not provided
+    final idxName = indexName ?? "idx_${collection.name}_${columns.join("_")}";
+    final columnsStr = columns.map((col) => "`$col`").join(", ");
+    final index = unique
+        ? "CREATE UNIQUE INDEX `$idxName` ON `${collection.name}` ($columnsStr)"
+        : "CREATE INDEX `$idxName` ON `${collection.name}` ($columnsStr)";
+
+    // Check if index already exists
+    if (collection.indexes.contains(index)) {
+      throw ArgumentError("Index already exists");
+    }
+
+    collection.indexes.add(index);
+
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Removes an index from the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [columns] - List of column names that identify the index to remove
+  /// Returns the updated collection model
+  Future<CollectionModel> removeIndex(
+    String collectionIdOrName,
+    List<String> columns, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (columns.isEmpty) {
+      throw ArgumentError("At least one column must be specified");
+    }
+
+    // Find and remove indexes that match the columns
+    final initialLength = collection.indexes.length;
+    collection.indexes = collection.indexes.where((idx) {
+      // Check if index contains all the specified columns
+      // Handle both backticked and non-backticked formats
+      final hasAllColumns = columns.every((col) {
+        return idx.contains("`$col`") ||
+            idx.contains("($col)") ||
+            idx.contains("($col,") ||
+            idx.contains(", $col)");
+      });
+      return !hasAllColumns;
+    }).toList();
+
+    if (collection.indexes.length == initialLength) {
+      throw ArgumentError("Index not found");
+    }
+
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Gets all indexes for the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// Returns a list of index strings
+  Future<List<String>> getIndexes(
+    String collectionIdOrName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+    return collection.indexes;
+  }
+
+  // -------------------------------------------------------------------
+  // Access Rights Management Helpers
+  // -------------------------------------------------------------------
+
+  /// Sets the list rule (read/list access rule) for the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [rule] - Rule expression (use null or empty string to remove)
+  /// Returns the updated collection model
+  Future<CollectionModel> setListRule(
+    String collectionIdOrName,
+    String? rule, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+    collection.listRule = rule?.isEmpty ?? true ? null : rule;
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets the view rule (read/view access rule) for the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [rule] - Rule expression (use null or empty string to remove)
+  /// Returns the updated collection model
+  Future<CollectionModel> setViewRule(
+    String collectionIdOrName,
+    String? rule, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+    collection.viewRule = rule?.isEmpty ?? true ? null : rule;
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets the create rule for the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [rule] - Rule expression (use null or empty string to remove)
+  /// Returns the updated collection model
+  Future<CollectionModel> setCreateRule(
+    String collectionIdOrName,
+    String? rule, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+    collection.createRule = rule?.isEmpty ?? true ? null : rule;
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets the update rule for the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [rule] - Rule expression (use null or empty string to remove)
+  /// Returns the updated collection model
+  Future<CollectionModel> setUpdateRule(
+    String collectionIdOrName,
+    String? rule, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+    collection.updateRule = rule?.isEmpty ?? true ? null : rule;
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Sets the delete rule for the collection.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// [rule] - Rule expression (use null or empty string to remove)
+  /// Returns the updated collection model
+  Future<CollectionModel> setDeleteRule(
+    String collectionIdOrName,
+    String? rule, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+    collection.deleteRule = rule?.isEmpty ?? true ? null : rule;
+    return update(
+      collectionIdOrName,
+      body: collection.toJson(),
       query: query,
       headers: headers,
     );
