@@ -185,6 +185,94 @@ class SettingsService extends BaseService {
     return update(body: enrichedBody, query: query, headers: headers);
   }
 
+  // -------------------------------------------------------------------
+  // Mail-Specific Helpers (SMTP + Sender Info)
+  // -------------------------------------------------------------------
+
+  /// Gets the current mail settings (both sender info from meta and SMTP configuration).
+  ///
+  /// This is a convenience method that returns both the sender information (meta)
+  /// and SMTP configuration together, matching what's shown on the mail settings page.
+  ///
+  /// Returns object containing meta (senderName, senderAddress) and smtp configuration
+  Future<Map<String, dynamic>> getMailSettings({
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final allSettings = await getAll(query: query, headers: headers);
+    return {
+      "meta": {
+        "senderName": allSettings["meta"]?["senderName"],
+        "senderAddress": allSettings["meta"]?["senderAddress"],
+      },
+      "smtp": allSettings["smtp"],
+    };
+  }
+
+  /// Updates mail settings (both sender info and SMTP configuration).
+  ///
+  /// This is a convenience method that updates both the sender information (meta)
+  /// and SMTP configuration in a single call, matching the mail settings page behavior.
+  ///
+  /// Returns updated settings
+  Future<Map<String, dynamic>> updateMailSettings({
+    String? senderName,
+    String? senderAddress,
+    Map<String, dynamic>? smtp,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+
+    if (senderName != null || senderAddress != null) {
+      enrichedBody["meta"] = <String, dynamic>{};
+      if (senderName != null) {
+        enrichedBody["meta"]["senderName"] = senderName;
+      }
+      if (senderAddress != null) {
+        enrichedBody["meta"]["senderAddress"] = senderAddress;
+      }
+    }
+
+    if (smtp != null) {
+      enrichedBody["smtp"] = smtp;
+    }
+
+    return update(body: enrichedBody, query: query, headers: headers);
+  }
+
+  /// Sends a test email with the configured SMTP settings.
+  ///
+  /// This is a convenience method for testing email configuration.
+  /// The possible email template values are:
+  /// - verification
+  /// - password-reset
+  /// - email-change
+  /// - otp
+  /// - login-alert
+  ///
+  /// [toEmail] - Email address to send the test email to
+  /// [template] - Email template to use (default: "verification")
+  /// [collectionIdOrName] - Collection ID or name (default: "_superusers")
+  Future<void> testMail(
+    String toEmail, {
+    String template = "verification",
+    String collectionIdOrName = "_superusers",
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return testEmail(
+      toEmail,
+      template,
+      collection: collectionIdOrName,
+      body: body,
+      query: query,
+      headers: headers,
+    );
+  }
+
   /// Updates the S3 storage configuration.
   ///
   /// Returns updated settings
