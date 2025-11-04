@@ -563,6 +563,22 @@ pb.realtime.onDisconnect = (subscriptions) { ... }
 
 ---
 
+#### Management API Services
+
+> 📖 **Management API Documentation**: See [docs/MANAGEMENT_API.md](./docs/MANAGEMENT_API.md) for comprehensive guide on managing application settings, backups, logs, crons, and other administrative operations.
+
+The SDK provides full access to all backend management capabilities:
+
+- **SettingsService** - Application configuration, mail/SMTP settings, storage configuration, backup scheduling, log settings
+- **BackupService** - Create, list, upload, delete, and restore backups
+- **LogService** - Query and analyze application logs with statistics
+- **CronService** - List and manually execute cron jobs
+- **HealthService** - Check API health status
+
+All management operations require superuser authentication (🔐).
+
+---
+
 #### VectorService ([Detailed class reference](https://pub.dev/documentation/bosbase/latest/bosbase/VectorService-class.html), [Vector API docs](./VECTOR_API.md))
 
 > Vector database operations for semantic search, RAG, and AI applications.
