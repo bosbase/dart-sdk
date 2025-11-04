@@ -1,6 +1,7 @@
 import "../client.dart";
 import "../dtos/collection_field.dart";
 import "../dtos/collection_model.dart";
+import "../dtos/collection_schema_info.dart";
 import "base_crud_service.dart";
 
 /// The service that handles the **Collection APIs**.
@@ -904,5 +905,63 @@ class CollectionService extends BaseCrudService<CollectionModel> {
       query: query,
       headers: headers,
     );
+  }
+
+  // -------------------------------------------------------------------
+  // Schema Query Methods
+  // -------------------------------------------------------------------
+
+  /// Gets the schema (fields and types) for a single collection.
+  ///
+  /// This method returns simplified schema information containing only
+  /// field names, types, and basic metadata (required, system, hidden flags).
+  /// This is useful for AI systems to understand the structure of collections
+  /// without fetching the full collection definition.
+  ///
+  /// [collectionIdOrName] - Collection id or name
+  /// Returns collection schema information
+  Future<CollectionSchemaInfo> getSchema(
+    String collectionIdOrName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return client
+        .send<Map<String, dynamic>>(
+      "$baseCrudPath/${Uri.encodeComponent(collectionIdOrName)}/schema",
+      body: const {},
+      query: query,
+      headers: headers,
+    )
+        .then((data) {
+      return CollectionSchemaInfo.fromJson(data);
+    });
+  }
+
+  /// Gets the schema (fields and types) for all collections in the system.
+  ///
+  /// This method returns simplified schema information for all collections,
+  /// containing only field names, types, and basic metadata (required, system, hidden flags).
+  /// This is useful for AI systems to understand the overall structure of the system
+  /// and all available collections without fetching full collection definitions.
+  ///
+  /// Returns object containing list of collection schemas
+  Future<List<CollectionSchemaInfo>> getAllSchemas({
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    return client
+        .send<Map<String, dynamic>>(
+      "$baseCrudPath/schemas",
+      body: const {},
+      query: query,
+      headers: headers,
+    )
+        .then((data) {
+      final collectionsData = data["collections"] as List<dynamic>? ?? [];
+      return collectionsData
+          .map((item) => CollectionSchemaInfo.fromJson(
+              item as Map<String, dynamic>))
+          .toList();
+    });
   }
 }
