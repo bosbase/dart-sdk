@@ -89,8 +89,175 @@ final collection = await pb.collections.create(CollectionModel(
 ### Update Collection
 
 ```dart
+// Update collection rules
 final updated = await pb.collections.update('articles', body: {
   'listRule': 'published = true'
+});
+
+// Update collection name
+final updated = await pb.collections.update('articles', body: {
+  'name': 'posts'
+});
+```
+
+### Add Fields to Collection
+
+To add a new field to an existing collection, fetch the collection, add the field to the fields array, and update:
+
+```dart
+// Get existing collection
+var collection = await pb.collections.getOne('articles');
+
+// Add new field to existing fields
+final newFields = List<Map<String, dynamic>>.from(collection.fields);
+newFields.add({
+  'name': 'views',
+  'type': 'number',
+  'min': 0,
+  'onlyInt': true,
+});
+
+// Update collection with new field
+await pb.collections.update('articles', body: {
+  'fields': newFields,
+});
+
+// Or add multiple fields at once
+newFields.addAll([
+  {
+    'name': 'excerpt',
+    'type': 'text',
+    'max': 500,
+  },
+  {
+    'name': 'cover',
+    'type': 'file',
+    'maxSelect': 1,
+    'mimeTypes': ['image/jpeg', 'image/png'],
+  },
+]);
+
+await pb.collections.update('articles', body: {
+  'fields': newFields,
+});
+```
+
+### Delete Fields from Collection
+
+To delete a field, fetch the collection, remove the field from the fields array, and update:
+
+```dart
+// Get existing collection
+var collection = await pb.collections.getOne('articles');
+
+// Remove field by filtering it out
+final updatedFields = (collection.fields as List)
+    .where((field) => field['name'] != 'oldFieldName')
+    .toList();
+
+// Update collection without the deleted field
+await pb.collections.update('articles', body: {
+  'fields': updatedFields,
+});
+
+// Or remove multiple fields
+final fieldsToKeep = ['title', 'content', 'author', 'status'];
+final filteredFields = (collection.fields as List)
+    .where((field) => 
+        fieldsToKeep.contains(field['name']) || field['system'] == true)
+    .toList();
+
+await pb.collections.update('articles', body: {
+  'fields': filteredFields,
+});
+```
+
+### Modify Fields in Collection
+
+To modify an existing field (e.g., change its type, add options, etc.), fetch the collection, update the field object, and save:
+
+```dart
+// Get existing collection
+var collection = await pb.collections.getOne('articles');
+
+// Convert fields to mutable list
+final fields = List<Map<String, dynamic>>.from(collection.fields);
+
+// Find and modify a field
+final titleIndex = fields.indexWhere((f) => f['name'] == 'title');
+if (titleIndex != -1) {
+  fields[titleIndex] = {
+    ...fields[titleIndex],
+    'max': 200,  // Change max length
+    'required': true,  // Make required
+  };
+}
+
+// Update the field type
+final statusIndex = fields.indexWhere((f) => f['name'] == 'status');
+if (statusIndex != -1) {
+  // Note: Changing field types may require data migration
+  fields[statusIndex] = {
+    ...fields[statusIndex],
+    'type': 'select',
+    'options': {
+      'values': ['draft', 'published', 'archived'],
+    },
+    'maxSelect': 1,
+  };
+}
+
+// Save changes
+await pb.collections.update('articles', body: {
+  'fields': fields,
+});
+```
+
+### Complete Example: Managing Collection Fields
+
+```dart
+import 'package:bosbase/bosbase.dart';
+
+final pb = Bosbase('http://localhost:8090');
+await pb.admins.authWithPassword('admin@example.com', 'password');
+
+// Get existing collection
+var collection = await pb.collections.getOne('articles');
+
+// Convert to mutable list
+final fields = List<Map<String, dynamic>>.from(collection.fields);
+
+// Add new fields
+fields.addAll([
+  {
+    'name': 'tags',
+    'type': 'select',
+    'options': {
+      'values': ['tech', 'design', 'business'],
+    },
+    'maxSelect': 5,
+  },
+  {
+    'name': 'published_at',
+    'type': 'date',
+  },
+]);
+
+// Remove an old field
+fields.removeWhere((f) => f['name'] == 'oldField');
+
+// Modify existing field
+final viewsIndex = fields.indexWhere((f) => f['name'] == 'views');
+if (viewsIndex != -1) {
+  fields[viewsIndex] = {
+    ...fields[viewsIndex],
+    'max': 1000000,  // Increase max value
+  };
+}
+
+// Save all changes at once
+await pb.collections.update('articles', body: {
+  'fields': fields,
 });
 ```
 
