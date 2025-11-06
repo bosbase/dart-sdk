@@ -128,8 +128,7 @@ class CollectionService extends BaseCrudService<CollectionModel> {
     final collection = CollectionModel.fromJson(collectionData);
 
     return create(
-      collection,
-      body: body,
+      body: collection.toJson()..addAll(body),
       query: query,
       headers: headers,
     );
@@ -327,35 +326,6 @@ class CollectionService extends BaseCrudService<CollectionModel> {
       
       return normalized;
     }).toList();
-  }
-
-  /// Imports the provided collections.
-  ///
-  /// If [deleteMissing] is `true`, all local collections and schema fields,
-  /// that are not present in the imported configuration, WILL BE DELETED
-  /// (including their related records data)!
-  ///
-  /// **Warning**: This operation is destructive when [deleteMissing] is true.
-  /// It's recommended to call [normalizeForImport] on the collections
-  /// before importing to ensure clean data.
-  Future<void> import(
-    List<CollectionModel> collections, {
-    bool deleteMissing = false,
-    Map<String, dynamic> body = const {},
-    Map<String, dynamic> query = const {},
-    Map<String, String> headers = const {},
-  }) {
-    final enrichedBody = Map<String, dynamic>.of(body);
-    enrichedBody["collections"] = collections;
-    enrichedBody["deleteMissing"] = deleteMissing;
-
-    return client.send(
-      "$baseCrudPath/import",
-      method: "PUT",
-      body: enrichedBody,
-      query: query,
-      headers: headers,
-    );
   }
 
   // -------------------------------------------------------------------

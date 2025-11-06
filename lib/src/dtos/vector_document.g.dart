@@ -136,6 +136,7 @@ VectorCollectionConfig _$VectorCollectionConfigFromJson(
     VectorCollectionConfig(
       dimension: (json['dimension'] as num?)?.toInt(),
       distance: json['distance'] as String?,
+      options: json['options'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$VectorCollectionConfigToJson(
@@ -143,6 +144,7 @@ Map<String, dynamic> _$VectorCollectionConfigToJson(
     <String, dynamic>{
       'dimension': instance.dimension,
       'distance': instance.distance,
+      'options': instance.options,
     };
 
 VectorCollectionInfo _$VectorCollectionInfoFromJson(

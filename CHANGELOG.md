@@ -1,3 +1,12 @@
+## 0.23.1
+
+- Fixed `collection_service.dart` errors: corrected `create()` method call to use named parameters and removed duplicate `import()` method.
+- Fixed linting issues in `vector_service.dart`: removed redundant `method: "GET"` arguments and fixed line length issues.
+- Updated SDK version requirement from `>=3.0.0` to `>=3.8.0` to match `json_serializable` requirements.
+- Renamed `docs/` directory to `doc/` to follow Pub package layout conventions.
+- Generated missing `.g.dart` files for `collection_field_schema_info.dart` and `collection_schema_info.dart`.
+- Updated `.gitignore` to allow `doc/` directory for documentation files while still ignoring generated docs.
+
 ## 0.23.0+1
 
 - Added [note in the README](https://github.com/bosbase/dart-sdk#oauth2-and-android-15) about Android 15+ and the "All-in-one" OAuth2 flow.

@@ -6,7 +6,10 @@
 build/
 
 # Conventional directory for dart doc outputs.
-doc/
+# Note: We use doc/ for our documentation files, so we only ignore generated docs
+# Generated docs would typically be in doc/api/ or similar subdirectories
+doc/api/
+doc/coverage/
 
 # Omit markdown preview files
 README.html

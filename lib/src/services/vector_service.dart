@@ -1,5 +1,4 @@
 import "../client.dart";
-import "../client_exception.dart";
 import "../dtos/vector_document.dart";
 import "base_service.dart";
 
@@ -178,7 +177,6 @@ class VectorService extends BaseService {
     final path = "${_getPath(collection)}/${Uri.encodeComponent(id)}";
     return client.send<Map<String, dynamic>>(
       path,
-      method: "GET",
       query: query,
       headers: headers,
     ).then((data) => VectorDocument.fromJson(data));
@@ -208,7 +206,6 @@ class VectorService extends BaseService {
     final path = _getPath(collection);
     return client.send<Map<String, dynamic>>(
       path,
-      method: "GET",
       query: enrichedQuery,
       headers: headers,
     );
@@ -300,11 +297,11 @@ class VectorService extends BaseService {
     final path = "$baseVectorPath/collections";
     return client.send<List<dynamic>>(
       path,
-      method: "GET",
       query: query,
       headers: headers,
     ).then((data) => data
-        .map((json) => VectorCollectionInfo.fromJson(json as Map<String, dynamic>))
+        .map((json) => VectorCollectionInfo.fromJson(
+            json as Map<String, dynamic>))
         .toList());
   }
 }
