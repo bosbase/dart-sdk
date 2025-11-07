@@ -934,4 +934,301 @@ class CollectionService extends BaseCrudService<CollectionModel> {
           .toList();
     });
   }
+
+  // -------------------------------------------------------------------
+  // OAuth2 Configuration Methods
+  // -------------------------------------------------------------------
+
+  /// Enables OAuth2 authentication for an auth collection.
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// Returns the updated collection model
+  /// Throws [ArgumentError] if collection is not an auth collection
+  Future<CollectionModel> enableOAuth2(
+    String collectionIdOrName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("OAuth2 is only available for auth collections");
+    }
+
+    final json = collection.toJson();
+    if (json["oauth2"] == null) {
+      json["oauth2"] = {
+        "enabled": true,
+        "mappedFields": <String, String>{},
+        "providers": <dynamic>[],
+      };
+    } else {
+      (json["oauth2"] as Map<String, dynamic>)["enabled"] = true;
+    }
+
+    return update(
+      collectionIdOrName,
+      body: json,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Disables OAuth2 authentication for an auth collection.
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// Returns the updated collection model
+  /// Throws [ArgumentError] if collection is not an auth collection
+  Future<CollectionModel> disableOAuth2(
+    String collectionIdOrName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("OAuth2 is only available for auth collections");
+    }
+
+    final json = collection.toJson();
+    if (json["oauth2"] != null) {
+      (json["oauth2"] as Map<String, dynamic>)["enabled"] = false;
+    }
+
+    return update(
+      collectionIdOrName,
+      body: json,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Gets the OAuth2 configuration for an auth collection.
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// Returns OAuth2 configuration object
+  /// Throws [ArgumentError] if collection is not an auth collection
+  Future<Map<String, dynamic>> getOAuth2Config(
+    String collectionIdOrName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("OAuth2 is only available for auth collections");
+    }
+
+    final json = collection.toJson();
+    final oauth2 = json["oauth2"] as Map<String, dynamic>?;
+
+    return {
+      "enabled": oauth2?["enabled"] ?? false,
+      "mappedFields": oauth2?["mappedFields"] ?? <String, String>{},
+      "providers": oauth2?["providers"] ?? <dynamic>[],
+    };
+  }
+
+  /// Sets the OAuth2 mapped fields for an auth collection.
+  ///
+  /// Mapped fields define how OAuth2 provider user data maps to collection fields.
+  /// For example: { "name": "name", "email": "email", "avatarUrl": "avatar" }
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// [mappedFields] - Map mapping OAuth2 fields to collection fields
+  /// Returns the updated collection model
+  /// Throws [ArgumentError] if collection is not an auth collection
+  Future<CollectionModel> setOAuth2MappedFields(
+    String collectionIdOrName,
+    Map<String, String> mappedFields, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("OAuth2 is only available for auth collections");
+    }
+
+    final json = collection.toJson();
+    if (json["oauth2"] == null) {
+      json["oauth2"] = {
+        "enabled": false,
+        "mappedFields": <String, String>{},
+        "providers": <dynamic>[],
+      };
+    }
+    (json["oauth2"] as Map<String, dynamic>)["mappedFields"] = mappedFields;
+
+    return update(
+      collectionIdOrName,
+      body: json,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Adds a new OAuth2 provider to an auth collection.
+  ///
+  /// Before using this method, you need to:
+  /// 1. Create an OAuth2 app in the provider's dashboard
+  /// 2. Get the Client ID and Client Secret
+  /// 3. Register a redirect URL (typically: https://yourdomain.com/api/oauth2-redirect)
+  ///
+  /// Supported provider names include: "google", "github", "gitlab", "discord",
+  /// "facebook", "microsoft", "apple", "twitter", "spotify", "kakao", "twitch",
+  /// "strava", "vk", "yandex", "patreon", "linkedin", "instagram", "vimeo",
+  /// "digitalocean", "bitbucket", "dropbox", "planningcenter", "notion", "linear",
+  /// "oidc", "oidc2", "oidc3", and more.
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// [provider] - OAuth2 provider configuration map
+  /// Returns the updated collection model
+  /// Throws [ArgumentError] if collection is not an auth collection or provider is invalid
+  Future<CollectionModel> addOAuth2Provider(
+    String collectionIdOrName,
+    Map<String, dynamic> provider, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("OAuth2 is only available for auth collections");
+    }
+
+    final json = collection.toJson();
+    if (json["oauth2"] == null) {
+      json["oauth2"] = {
+        "enabled": false,
+        "mappedFields": <String, String>{},
+        "providers": <dynamic>[],
+      };
+    }
+
+    final providers = (json["oauth2"] as Map<String, dynamic>)["providers"] as List<dynamic>;
+
+    // Check if provider with this name already exists
+    final providerName = provider["name"] as String?;
+    if (providerName == null) {
+      throw ArgumentError("Provider name is required");
+    }
+
+    final existingProviderIndex = providers.indexWhere(
+      (p) => (p as Map<String, dynamic>)["name"] == providerName,
+    );
+    if (existingProviderIndex != -1) {
+      throw ArgumentError('OAuth2 provider with name "$providerName" already exists');
+    }
+
+    // Add the new provider
+    providers.add({
+      "name": provider["name"],
+      "clientId": provider["clientId"],
+      "clientSecret": provider["clientSecret"],
+      "authURL": provider["authURL"],
+      "tokenURL": provider["tokenURL"],
+      "userInfoURL": provider["userInfoURL"],
+      "displayName": provider["displayName"] ?? provider["name"],
+      if (provider.containsKey("pkce")) "pkce": provider["pkce"],
+      if (provider.containsKey("extra")) "extra": provider["extra"],
+    });
+
+    return update(
+      collectionIdOrName,
+      body: json,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Updates an existing OAuth2 provider in an auth collection.
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// [providerName] - Name of the provider to update
+  /// [updates] - Partial provider configuration map to update
+  /// Returns the updated collection model
+  /// Throws [ArgumentError] if collection is not an auth collection or provider not found
+  Future<CollectionModel> updateOAuth2Provider(
+    String collectionIdOrName,
+    String providerName,
+    Map<String, dynamic> updates, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("OAuth2 is only available for auth collections");
+    }
+
+    final json = collection.toJson();
+    if (json["oauth2"] == null) {
+      throw ArgumentError("OAuth2 is not configured for this collection");
+    }
+
+    final providers = (json["oauth2"] as Map<String, dynamic>)["providers"] as List<dynamic>;
+
+    final providerIndex = providers.indexWhere(
+      (p) => (p as Map<String, dynamic>)["name"] == providerName,
+    );
+    if (providerIndex == -1) {
+      throw ArgumentError('OAuth2 provider with name "$providerName" not found');
+    }
+
+    // Update the provider
+    final provider = providers[providerIndex] as Map<String, dynamic>;
+    provider.addAll(updates);
+    providers[providerIndex] = provider;
+
+    return update(
+      collectionIdOrName,
+      body: json,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Removes an OAuth2 provider from an auth collection.
+  ///
+  /// [collectionIdOrName] - Auth collection id or name
+  /// [providerName] - Name of the provider to remove
+  /// Returns the updated collection model
+  /// Throws [ArgumentError] if collection is not an auth collection or provider not found
+  Future<CollectionModel> removeOAuth2Provider(
+    String collectionIdOrName,
+    String providerName, {
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final collection = await getOne(collectionIdOrName, query: query, headers: headers);
+
+    if (collection.type != "auth") {
+      throw ArgumentError("OAuth2 is only available for auth collections");
+    }
+
+    final json = collection.toJson();
+    if (json["oauth2"] == null) {
+      throw ArgumentError("OAuth2 is not configured for this collection");
+    }
+
+    final providers = (json["oauth2"] as Map<String, dynamic>)["providers"] as List<dynamic>;
+
+    final providerIndex = providers.indexWhere(
+      (p) => (p as Map<String, dynamic>)["name"] == providerName,
+    );
+    if (providerIndex == -1) {
+      throw ArgumentError('OAuth2 provider with name "$providerName" not found');
+    }
+
+    // Remove the provider
+    providers.removeAt(providerIndex);
+
+    return update(
+      collectionIdOrName,
+      body: json,
+      query: query,
+      headers: headers,
+    );
+  }
 }
