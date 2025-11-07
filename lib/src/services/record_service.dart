@@ -186,6 +186,32 @@ class RecordService extends BaseCrudService<RecordModel> {
     });
   }
 
+  /// Returns the total count of records matching the provided filter.
+  ///
+  /// This method is optimized to only return the count without fetching
+  /// the actual records, making it more efficient when you only need
+  /// to know the quantity of matching records.
+  Future<int> getCount({
+    String? filter,
+    String? expand,
+    String? fields,
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedQuery = Map<String, dynamic>.of(query);
+    enrichedQuery["filter"] ??= filter;
+    enrichedQuery["expand"] ??= expand;
+    enrichedQuery["fields"] ??= fields;
+
+    return client
+        .send<Map<String, dynamic>>(
+          "$baseCrudPath/count",
+          query: enrichedQuery,
+          headers: headers,
+        )
+        .then((data) => data["count"] as int);
+  }
+
   // -----------------------------------------------------------------
   // Auth collection handlers
   // -----------------------------------------------------------------
