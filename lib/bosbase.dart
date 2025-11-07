@@ -47,6 +47,7 @@ export "src/services/base_crud_service.dart";
 export "src/services/batch_service.dart";
 export "src/services/collection_service.dart";
 export "src/services/cron_service.dart";
+export "src/services/cache_service.dart";
 export "src/services/file_service.dart";
 export "src/services/health_service.dart";
 export "src/services/log_service.dart";

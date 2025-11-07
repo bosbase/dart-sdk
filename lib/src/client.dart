@@ -18,6 +18,7 @@ import "services/realtime_service.dart";
 import "services/record_service.dart";
 import "services/settings_service.dart";
 import "services/vector_service.dart";
+import "services/cache_service.dart";
 
 const bool isWeb = bool.fromEnvironment("dart.library.js_util");
 
@@ -73,6 +74,9 @@ class Bosbase {
   /// The service that handles the **Vector APIs**.
   late final VectorService vectors;
 
+  /// The service that handles the **Cache APIs**.
+  late final CacheService caches;
+
   /// The underlying http client that will be used to send the request.
   /// This is used primarily for the unit tests.
   late final http.Client Function() httpClientFactory;
@@ -118,6 +122,7 @@ class Bosbase {
     backups = BackupService(this);
     crons = CronService(this);
     vectors = VectorService(this);
+    caches = CacheService(this);
   }
 
   /// Returns the RecordService associated to the specified collection.
