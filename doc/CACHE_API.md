@@ -55,6 +55,11 @@ final entry = await pb.caches.getEntry("ai-session", "dialog:42");
 print(entry.source);   // cache | database
 print(entry.expiresAt); // RFC3339 string or null if no TTL
 
+// Renew an entry's TTL without changing its value.
+// This extends the expiration time by the specified TTL (or uses the cache's default TTL if omitted).
+final renewed = await pb.caches.renewEntry("ai-session", "dialog:42", ttlSeconds: 120); // extend by 120 seconds
+print(renewed.expiresAt); // new expiration time
+
 // Delete the entry when no longer needed.
 await pb.caches.deleteEntry("ai-session", "dialog:42");
 ```

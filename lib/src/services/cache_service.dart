@@ -20,15 +20,15 @@ class CacheConfigSummary {
 
   factory CacheConfigSummary.fromJson(Map<String, dynamic> json) {
     return CacheConfigSummary(
-      name: json["name"] ?? "",
+      name: (json["name"] as String?) ?? "",
       sizeBytes: json["sizeBytes"] is int
-          ? json["sizeBytes"]
+          ? json["sizeBytes"] as int
           : int.tryParse("${json["sizeBytes"]}") ?? 0,
       defaultTTLSeconds: json["defaultTTLSeconds"] is int
-          ? json["defaultTTLSeconds"]
+          ? json["defaultTTLSeconds"] as int
           : int.tryParse("${json["defaultTTLSeconds"]}") ?? 0,
       readTimeoutMs: json["readTimeoutMs"] is int
-          ? json["readTimeoutMs"]
+          ? json["readTimeoutMs"] as int
           : int.tryParse("${json["readTimeoutMs"]}") ?? 0,
       created: json["created"] as String?,
       updated: json["updated"] as String?,
@@ -53,11 +53,11 @@ class CacheEntry {
 
   factory CacheEntry.fromJson(Map<String, dynamic> json) {
     return CacheEntry(
-      cache: json["cache"] ?? "",
-      key: json["key"] ?? "",
+      cache: (json["cache"] as String?) ?? "",
+      key: (json["key"] as String?) ?? "",
       value: json["value"],
-      source: json["source"],
-      expiresAt: json["expiresAt"],
+      source: json["source"] as String?,
+      expiresAt: json["expiresAt"] as String?,
     );
   }
 }
@@ -78,7 +78,8 @@ class CacheService extends BaseService {
       query: query,
       headers: headers,
     );
-    final items = response?["items"] as List<dynamic>? ?? const [];
+    final items =
+        (response["items"] as List<dynamic>?) ?? const [];
     return items
         .map(
           (item) => CacheConfigSummary.fromJson(item as Map<String, dynamic>),
@@ -181,6 +182,30 @@ class CacheService extends BaseService {
     return client
         .send<Map<String, dynamic>>(
           "/api/cache/${Uri.encodeComponent(cache)}/entries/${Uri.encodeComponent(key)}",
+          query: query,
+          headers: headers,
+        )
+        .then(CacheEntry.fromJson);
+  }
+
+  Future<CacheEntry> renewEntry(
+    String cache,
+    String key, {
+    int? ttlSeconds,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+    if (ttlSeconds != null) {
+      enrichedBody["ttlSeconds"] = ttlSeconds;
+    }
+
+    return client
+        .send<Map<String, dynamic>>(
+          "/api/cache/${Uri.encodeComponent(cache)}/entries/${Uri.encodeComponent(key)}",
+          method: "PATCH",
+          body: enrichedBody,
           query: query,
           headers: headers,
         )
