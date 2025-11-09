@@ -18,6 +18,7 @@ import "services/realtime_service.dart";
 import "services/record_service.dart";
 import "services/settings_service.dart";
 import "services/vector_service.dart";
+import "services/llm_document_service.dart";
 import "services/cache_service.dart";
 
 const bool isWeb = bool.fromEnvironment("dart.library.js_util");
@@ -74,6 +75,9 @@ class Bosbase {
   /// The service that handles the **Vector APIs**.
   late final VectorService vectors;
 
+  /// The service that handles the **LLM Document APIs**.
+  late final LLMDocumentService llmDocuments;
+
   /// The service that handles the **Cache APIs**.
   late final CacheService caches;
 
@@ -122,6 +126,7 @@ class Bosbase {
     backups = BackupService(this);
     crons = CronService(this);
     vectors = VectorService(this);
+    llmDocuments = LLMDocumentService(this);
     caches = CacheService(this);
   }
 
