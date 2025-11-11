@@ -864,5 +864,42 @@ try {
 
 ---
 
-This guide provides all essential operations for building applications with the BosBase Dart SDK. For more detailed information, refer to the specific API documentation files.
+## LangChaingo Examples
 
+### Completion
+
+```dart
+final result = await pb.langchaingo.completions(
+  LangChaingoCompletionRequest(
+    model: const LangChaingoModelConfig(provider: "openai", model: "gpt-4o-mini"),
+    messages: const [
+      LangChaingoCompletionMessage(role: "system", content: "Answer in one sentence."),
+      LangChaingoCompletionMessage(role: "user", content: "Give a fun Mars fact.")
+    ],
+  ),
+);
+
+print(result.content);
+```
+
+### Retrieval-Augmented Answer
+
+```dart
+final rag = await pb.langchaingo.rag(
+  LangChaingoRAGRequest(
+    collection: "knowledge-base",
+    question: "Why is the sky blue?",
+    topK: 3,
+    returnSources: true,
+  ),
+);
+
+print(rag.answer);
+for (final source in rag.sources ?? const []) {
+  print("${source.score} ${source.metadata}");
+}
+```
+
+---
+
+This guide provides all essential operations for building applications with the BosBase Dart SDK. For more detailed information, refer to the specific API documentation files.

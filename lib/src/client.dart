@@ -20,6 +20,7 @@ import "services/settings_service.dart";
 import "services/vector_service.dart";
 import "services/llm_document_service.dart";
 import "services/cache_service.dart";
+import "services/langchaingo_service.dart";
 
 const bool isWeb = bool.fromEnvironment("dart.library.js_util");
 
@@ -78,6 +79,9 @@ class Bosbase {
   /// The service that handles the **LLM Document APIs**.
   late final LLMDocumentService llmDocuments;
 
+  /// The service that handles the **LangChaingo APIs**.
+  late final LangChaingoService langchaingo;
+
   /// The service that handles the **Cache APIs**.
   late final CacheService caches;
 
@@ -127,6 +131,7 @@ class Bosbase {
     crons = CronService(this);
     vectors = VectorService(this);
     llmDocuments = LLMDocumentService(this);
+    langchaingo = LangChaingoService(this);
     caches = CacheService(this);
   }
 
@@ -236,9 +241,9 @@ class Bosbase {
 
     final query = _normalizeQueryParameters(queryParameters);
 
-    return Uri.parse(url).replace(
-      queryParameters: query.isNotEmpty ? query : null,
-    );
+    return Uri.parse(
+      url,
+    ).replace(queryParameters: query.isNotEmpty ? query : null);
   }
 
   /// Creates a new batch handler for sending multiple transactional

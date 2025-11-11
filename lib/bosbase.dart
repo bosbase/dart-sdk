@@ -41,6 +41,7 @@ export "src/dtos/result_list.dart";
 export "src/dtos/token_config.dart";
 export "src/dtos/vector_document.dart";
 export "src/dtos/llm_document.dart";
+export "src/dtos/langchaingo.dart";
 
 // services (exported mainly for dartdoc - https://github.com/dart-lang/dartdoc/issues/2154)
 export "src/services/backup_service.dart";
@@ -57,3 +58,4 @@ export "src/services/record_service.dart";
 export "src/services/settings_service.dart";
 export "src/services/vector_service.dart";
 export "src/services/llm_document_service.dart";
+export "src/services/langchaingo_service.dart";
