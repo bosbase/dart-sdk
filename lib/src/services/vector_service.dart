@@ -46,7 +46,7 @@ class VectorService extends BaseService {
       body: document.toJson(),
       query: query,
       headers: headers,
-    ).then((data) => VectorInsertResponse.fromJson(data));
+    ).then(VectorInsertResponse.fromJson);
   }
 
   /// Insert multiple vector documents in a batch.
@@ -77,7 +77,7 @@ class VectorService extends BaseService {
       body: options.toJson(),
       query: query,
       headers: headers,
-    ).then((data) => VectorBatchInsertResponse.fromJson(data));
+    ).then(VectorBatchInsertResponse.fromJson);
   }
 
   /// Update an existing vector document.
@@ -107,7 +107,7 @@ class VectorService extends BaseService {
       body: document.toJson(),
       query: query,
       headers: headers,
-    ).then((data) => VectorInsertResponse.fromJson(data));
+    ).then(VectorInsertResponse.fromJson);
   }
 
   /// Delete a vector document by ID.
@@ -159,7 +159,7 @@ class VectorService extends BaseService {
       body: options.toJson(),
       query: query,
       headers: headers,
-    ).then((data) => VectorSearchResponse.fromJson(data));
+    ).then(VectorSearchResponse.fromJson);
   }
 
   /// Get a vector document by ID.
@@ -179,7 +179,7 @@ class VectorService extends BaseService {
       path,
       query: query,
       headers: headers,
-    ).then((data) => VectorDocument.fromJson(data));
+    ).then(VectorDocument.fromJson);
   }
 
   /// List all vector documents in a collection (with optional pagination).

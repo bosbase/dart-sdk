@@ -486,7 +486,8 @@ class SettingsService extends BaseService {
 
   /// Sets the auto-backup cron schedule.
   ///
-  /// [cron] - Cron expression (e.g., "0 0 * * *" for daily). Use empty string to disable.
+  /// [cron] - Cron expression (e.g., "0 0 * * *" for daily).
+  /// Use empty string to disable.
   /// [cronMaxKeep] - Maximum number of backups to keep (required if cron is set)
   /// Returns updated settings
   Future<Map<String, dynamic>> setAutoBackupSchedule(
@@ -631,7 +632,8 @@ class SettingsService extends BaseService {
   /// This is a convenience method that returns log configuration,
   /// matching what's shown on the logs settings panel.
   ///
-  /// Returns object containing log configuration (maxDays, minLevel, logIP, logAuthId)
+  /// Returns object containing log configuration
+  /// (maxDays, minLevel, logIP, logAuthId)
   Future<Map<String, dynamic>> getLogSettings({
     Map<String, dynamic> query = const {},
     Map<String, String> headers = const {},

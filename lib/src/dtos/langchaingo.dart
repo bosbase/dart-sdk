@@ -75,8 +75,8 @@ class LangChaingoFunctionCall {
 
   factory LangChaingoFunctionCall.fromJson(Map<String, dynamic> json) =>
       LangChaingoFunctionCall(
-        name: json["name"] ?? "",
-        arguments: json["arguments"] ?? "",
+        name: (json["name"] as String?) ?? "",
+        arguments: (json["arguments"] as String?) ?? "",
       );
 }
 
@@ -93,8 +93,8 @@ class LangChaingoToolCall {
 
   factory LangChaingoToolCall.fromJson(Map<String, dynamic> json) =>
       LangChaingoToolCall(
-        id: json["id"] ?? "",
-        type: json["type"] ?? "",
+        id: (json["id"] as String?) ?? "",
+        type: (json["type"] as String?) ?? "",
         functionCall: json["functionCall"] is Map<String, dynamic>
             ? LangChaingoFunctionCall.fromJson(
                 json["functionCall"] as Map<String, dynamic>,
@@ -120,10 +120,12 @@ class LangChaingoCompletionResponse {
 
   factory LangChaingoCompletionResponse.fromJson(Map<String, dynamic> json) =>
       LangChaingoCompletionResponse(
-        content: json["content"] ?? "",
-        stopReason: json["stopReason"],
+        content: (json["content"] as String?) ?? "",
+        stopReason: json["stopReason"] as String?,
         generationInfo: json["generationInfo"] is Map<String, dynamic>
-            ? Map<String, dynamic>.from(json["generationInfo"])
+            ? Map<String, dynamic>.from(
+                json["generationInfo"] as Map<String, dynamic>,
+              )
             : null,
         functionCall: json["functionCall"] is Map<String, dynamic>
             ? LangChaingoFunctionCall.fromJson(
