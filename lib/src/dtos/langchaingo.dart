@@ -199,9 +199,11 @@ class LangChaingoSourceDocument {
 
   factory LangChaingoSourceDocument.fromJson(Map<String, dynamic> json) =>
       LangChaingoSourceDocument(
-        content: json["content"] ?? "",
+        content: (json["content"] as String?) ?? "",
         metadata: json["metadata"] is Map<String, dynamic>
-            ? Map<String, dynamic>.from(json["metadata"])
+            ? Map<String, dynamic>.from(
+                json["metadata"] as Map<String, dynamic>,
+              )
             : null,
         score: json["score"] is num ? (json["score"] as num).toDouble() : null,
       );
@@ -216,7 +218,7 @@ class LangChaingoRAGResponse {
   factory LangChaingoRAGResponse.fromJson(
     Map<String, dynamic> json,
   ) => LangChaingoRAGResponse(
-    answer: json["answer"] ?? "",
+    answer: (json["answer"] as String?) ?? "",
     sources: (json["sources"] as List?)
         ?.map(
           (item) =>

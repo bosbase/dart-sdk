@@ -1,4 +1,3 @@
-import "../client.dart";
 import "../dtos/langchaingo.dart";
 import "base_service.dart";
 

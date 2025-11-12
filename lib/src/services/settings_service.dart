@@ -412,7 +412,6 @@ class SettingsService extends BaseService {
     Map<String, String> headers = const {},
   }) {
     return testS3(
-      filesystem: "storage",
       body: body,
       query: query,
       headers: headers,
@@ -444,7 +443,8 @@ class SettingsService extends BaseService {
   // Backup-Specific Helpers (Auto-Backup + S3 Storage)
   // -------------------------------------------------------------------
 
-  /// Gets the current backup settings (auto-backup schedule and S3 storage configuration).
+  /// Gets the current backup settings (auto-backup schedule and
+  /// S3 storage configuration).
   ///
   /// This is a convenience method that returns backup configuration,
   /// matching what's shown on the backups settings page.
@@ -458,7 +458,8 @@ class SettingsService extends BaseService {
     return allSettings["backups"] as Map<String, dynamic>? ?? {};
   }
 
-  /// Updates backup settings (auto-backup schedule and S3 storage configuration).
+  /// Updates backup settings (auto-backup schedule and
+  /// S3 storage configuration).
   ///
   /// This is a convenience method for managing backup configuration:
   /// - Auto-backup cron schedule (leave empty to disable)
@@ -488,7 +489,8 @@ class SettingsService extends BaseService {
   ///
   /// [cron] - Cron expression (e.g., "0 0 * * *" for daily).
   /// Use empty string to disable.
-  /// [cronMaxKeep] - Maximum number of backups to keep (required if cron is set)
+  /// [cronMaxKeep] - Maximum number of backups to keep
+  /// (required if cron is set)
   /// Returns updated settings
   Future<Map<String, dynamic>> setAutoBackupSchedule(
     String cron, {
