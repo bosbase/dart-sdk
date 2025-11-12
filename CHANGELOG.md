@@ -1,3 +1,11 @@
+## 0.23.2
+
+- Fixed type errors in `langchaingo.dart`: added explicit type casts for `dynamic` to `String` and `String?` assignments in `fromJson` methods.
+- Fixed lint warnings: removed unused imports in `langchaingo_service.dart` and `llm_document_service.dart`.
+- Fixed lint warnings: sorted export directives alphabetically in `bosbase.dart`.
+- Fixed lint warnings: removed redundant argument values and fixed line length issues in `settings_service.dart`.
+- Fixed lint warnings: replaced unnecessary lambdas with tearoffs in `vector_service.dart`.
+
 ## 0.23.1
 
 - Fixed `collection_service.dart` errors: corrected `create()` method call to use named parameters and removed duplicate `import()` method.
