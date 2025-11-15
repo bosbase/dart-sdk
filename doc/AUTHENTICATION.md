@@ -381,6 +381,8 @@ ElevatedButton(
 
 ### Example 3: Token Management and Refresh
 
+> **BosBase note:** Calls to \`pb.collection("users").authWithPassword()\` now return static, non-expiring tokens. Environment variables can no longer shorten their lifetime, so the refresh logic below is only required for custom auth collections, impersonation flows, or any token you mint manually.
+
 \`\`\`dart
 import 'package:bosbase/bosbase.dart';
 
