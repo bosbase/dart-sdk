@@ -227,3 +227,95 @@ class LangChaingoRAGResponse {
         .toList(),
   );
 }
+
+class LangChaingoDocumentQueryRequest {
+  final LangChaingoModelConfig? model;
+  final String collection;
+  final String query;
+  final int? topK;
+  final double? scoreThreshold;
+  final LangChaingoRAGFilters? filters;
+  final String? promptTemplate;
+  final bool? returnSources;
+
+  const LangChaingoDocumentQueryRequest({
+    this.model,
+    required this.collection,
+    required this.query,
+    this.topK,
+    this.scoreThreshold,
+    this.filters,
+    this.promptTemplate,
+    this.returnSources,
+  });
+
+  Map<String, dynamic> toJson() => {
+    if (model != null) "model": model!.toJson(),
+    "collection": collection,
+    "query": query,
+    if (topK != null) "topK": topK,
+    if (scoreThreshold != null) "scoreThreshold": scoreThreshold,
+    if (filters != null) "filters": filters!.toJson(),
+    if (promptTemplate != null) "promptTemplate": promptTemplate,
+    if (returnSources != null) "returnSources": returnSources,
+  };
+}
+
+// DocumentQueryResponse is the same as RAGResponse
+typedef LangChaingoDocumentQueryResponse = LangChaingoRAGResponse;
+
+class LangChaingoSQLRequest {
+  final LangChaingoModelConfig? model;
+  final String query;
+  final List<String>? tables;
+  final int? topK;
+
+  const LangChaingoSQLRequest({
+    this.model,
+    required this.query,
+    this.tables,
+    this.topK,
+  });
+
+  Map<String, dynamic> toJson() => {
+    if (model != null) "model": model!.toJson(),
+    "query": query,
+    if (tables != null) "tables": tables,
+    if (topK != null) "topK": topK,
+  };
+}
+
+class LangChaingoSQLResponse {
+  final String sql;
+  final String answer;
+  final List<String>? columns;
+  final List<List<String>>? rows;
+  final String? rawResult;
+
+  const LangChaingoSQLResponse({
+    required this.sql,
+    required this.answer,
+    this.columns,
+    this.rows,
+    this.rawResult,
+  });
+
+  factory LangChaingoSQLResponse.fromJson(Map<String, dynamic> json) {
+    List<List<String>>? rowsList;
+    if (json["rows"] is List) {
+      rowsList = (json["rows"] as List)
+          .map((row) => (row as List).map((cell) => cell.toString()).toList())
+          .toList();
+    }
+
+    return LangChaingoSQLResponse(
+      sql: (json["sql"] as String?) ?? "",
+      answer: (json["answer"] as String?) ?? "",
+      columns: json["columns"] is List
+          ? (json["columns"] as List).map((e) => e.toString()).toList()
+          : null,
+      rows: rowsList,
+      rawResult: json["rawResult"] as String?,
+    );
+  }
+}
