@@ -21,6 +21,7 @@ import "services/vector_service.dart";
 import "services/llm_document_service.dart";
 import "services/cache_service.dart";
 import "services/langchaingo_service.dart";
+import "services/graphql_service.dart";
 
 const bool isWeb = bool.fromEnvironment("dart.library.js_util");
 
@@ -85,6 +86,9 @@ class Bosbase {
   /// The service that handles the **Cache APIs**.
   late final CacheService caches;
 
+  /// The service that handles GraphQL queries and mutations.
+  late final GraphQLService graphql;
+
   /// The underlying http client that will be used to send the request.
   /// This is used primarily for the unit tests.
   late final http.Client Function() httpClientFactory;
@@ -133,6 +137,7 @@ class Bosbase {
     llmDocuments = LLMDocumentService(this);
     langchaingo = LangChaingoService(this);
     caches = CacheService(this);
+    graphql = GraphQLService(this);
   }
 
   /// Returns the RecordService associated to the specified collection.

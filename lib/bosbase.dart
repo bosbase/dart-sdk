@@ -25,8 +25,11 @@ export "src/dtos/collection_model.dart";
 export "src/dtos/collection_schema_info.dart";
 export "src/dtos/cron_job.dart";
 export "src/dtos/email_template_config.dart";
+export "src/dtos/graphql_response.dart";
 export "src/dtos/health_check.dart";
 export "src/dtos/jsonable.dart";
+export "src/dtos/langchaingo.dart";
+export "src/dtos/llm_document.dart";
 export "src/dtos/log_model.dart";
 export "src/dtos/log_stat.dart";
 export "src/dtos/mfa_config.dart";
@@ -40,8 +43,6 @@ export "src/dtos/record_subscription_event.dart";
 export "src/dtos/result_list.dart";
 export "src/dtos/token_config.dart";
 export "src/dtos/vector_document.dart";
-export "src/dtos/langchaingo.dart";
-export "src/dtos/llm_document.dart";
 
 // services (exported mainly for dartdoc - https://github.com/dart-lang/dartdoc/issues/2154)
 export "src/services/backup_service.dart";
@@ -59,3 +60,4 @@ export "src/services/settings_service.dart";
 export "src/services/vector_service.dart";
 export "src/services/llm_document_service.dart";
 export "src/services/langchaingo_service.dart";
+export "src/services/graphql_service.dart";

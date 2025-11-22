@@ -262,8 +262,9 @@ class SettingsService extends BaseService {
 
   /// Updates mail settings (both sender info and SMTP configuration).
   ///
-  /// This is a convenience method that updates both the sender information (meta)
-  /// and SMTP configuration in a single call, matching the mail settings page behavior.
+  /// This is a convenience method that updates both the sender information
+  /// (meta) and SMTP configuration in a single call, matching the mail
+  /// settings page behavior.
   ///
   /// Returns updated settings
   Future<Map<String, dynamic>> updateMailSettings({
@@ -277,13 +278,14 @@ class SettingsService extends BaseService {
     final enrichedBody = Map<String, dynamic>.of(body);
 
     if (senderName != null || senderAddress != null) {
-      enrichedBody["meta"] = <String, dynamic>{};
+      final metaMap = <String, dynamic>{};
       if (senderName != null) {
-        enrichedBody["meta"]["senderName"] = senderName;
+        metaMap["senderName"] = senderName;
       }
       if (senderAddress != null) {
-        enrichedBody["meta"]["senderAddress"] = senderAddress;
+        metaMap["senderAddress"] = senderAddress;
       }
+      enrichedBody["meta"] = metaMap;
     }
 
     if (smtp != null) {
@@ -359,8 +361,8 @@ class SettingsService extends BaseService {
 
   /// Gets the current S3 storage configuration.
   ///
-  /// This is a convenience method specifically for file storage S3 configuration,
-  /// equivalent to calling getCategory("s3").
+  /// This is a convenience method specifically for file storage S3
+  /// configuration, equivalent to calling getCategory("s3").
   ///
   /// Returns the S3 storage configuration object or null if not found
   Future<Map<String, dynamic>?> getStorageS3({
@@ -372,8 +374,8 @@ class SettingsService extends BaseService {
 
   /// Updates the S3 storage configuration for file storage.
   ///
-  /// This is a convenience method specifically for file storage S3 configuration,
-  /// equivalent to calling updateS3().
+  /// This is a convenience method specifically for file storage S3
+  /// configuration, equivalent to calling updateS3().
   ///
   /// Returns updated settings
   Future<Map<String, dynamic>> updateStorageS3({
