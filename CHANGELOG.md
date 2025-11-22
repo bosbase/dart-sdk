@@ -1,3 +1,12 @@
+## 0.23.3
+
+- Fixed type casting errors in `graphql_response.dart`: added explicit type casts for `dynamic` to `List` and `Map` in `fromJson` method.
+- Fixed dead null-aware expression in `graphql_service.dart`: removed unnecessary null check operator.
+- Fixed lint warnings: removed unused import in `graphql_service.dart`.
+- Fixed lint warnings: sorted export directives alphabetically in `bosbase.dart`.
+- Fixed lint warnings: resolved dynamic calls in `settings_service.dart` by using typed map variables.
+- Fixed lint warnings: fixed line length issues in `settings_service.dart`.
+
 ## 0.23.2
 
 - Fixed type errors in `langchaingo.dart`: added explicit type casts for `dynamic` to `String` and `String?` assignments in `fromJson` methods.
