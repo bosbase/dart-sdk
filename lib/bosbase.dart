@@ -61,3 +61,4 @@ export "src/services/vector_service.dart";
 export "src/services/llm_document_service.dart";
 export "src/services/langchaingo_service.dart";
 export "src/services/graphql_service.dart";
+export "src/services/pubsub_service.dart";

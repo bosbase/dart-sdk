@@ -242,19 +242,22 @@ class SettingsService extends BaseService {
 
   /// Gets the current mail settings (both sender info from meta and SMTP configuration).
   ///
-  /// This is a convenience method that returns both the sender information (meta)
-  /// and SMTP configuration together, matching what's shown on the mail settings page.
+  /// This is a convenience method that returns both the sender information
+  /// (meta) and SMTP configuration together, matching what's shown on the
+  /// mail settings page.
   ///
-  /// Returns object containing meta (senderName, senderAddress) and smtp configuration
+  /// Returns object containing meta (senderName, senderAddress) and smtp
+  /// configuration
   Future<Map<String, dynamic>> getMailSettings({
     Map<String, dynamic> query = const {},
     Map<String, String> headers = const {},
   }) async {
     final allSettings = await getAll(query: query, headers: headers);
+    final meta = allSettings["meta"] as Map<String, dynamic>?;
     return {
       "meta": {
-        "senderName": allSettings["meta"]?["senderName"],
-        "senderAddress": allSettings["meta"]?["senderAddress"],
+        "senderName": meta?["senderName"],
+        "senderAddress": meta?["senderAddress"],
       },
       "smtp": allSettings["smtp"],
     };

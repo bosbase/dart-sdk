@@ -1,3 +1,11 @@
+## 0.23.4
+
+- Fixed argument type error in `pubsub_service.dart`: added explicit cast from `dynamic` to `Object` for error handler.
+- Fixed lint warnings: removed unused import in `pubsub_service.dart`.
+- Fixed lint warnings: added explicit type arguments to `StreamSubscription` in `pubsub_service.dart`.
+- Fixed lint warnings: fixed line length issue in `pubsub_service.dart`.
+- Fixed lint warnings: resolved dynamic calls in `settings_service.dart` by casting to proper map type.
+
 ## 0.23.3
 
 - Fixed type casting errors in `graphql_response.dart`: added explicit type casts for `dynamic` to `List` and `Map` in `fromJson` method.

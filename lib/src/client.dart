@@ -22,6 +22,7 @@ import "services/llm_document_service.dart";
 import "services/cache_service.dart";
 import "services/langchaingo_service.dart";
 import "services/graphql_service.dart";
+import "services/pubsub_service.dart";
 
 const bool isWeb = bool.fromEnvironment("dart.library.js_util");
 
@@ -89,6 +90,9 @@ class Bosbase {
   /// The service that handles GraphQL queries and mutations.
   late final GraphQLService graphql;
 
+  /// An instance of the service that handles the **WebSocket pub/sub APIs**.
+  late final PubSubService pubsub;
+
   /// The underlying http client that will be used to send the request.
   /// This is used primarily for the unit tests.
   late final http.Client Function() httpClientFactory;
@@ -138,6 +142,7 @@ class Bosbase {
     langchaingo = LangChaingoService(this);
     caches = CacheService(this);
     graphql = GraphQLService(this);
+    pubsub = PubSubService(this);
   }
 
   /// Returns the RecordService associated to the specified collection.
