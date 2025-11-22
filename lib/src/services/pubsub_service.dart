@@ -271,7 +271,7 @@ class PubSubService extends BaseService {
       final topics = _subscriptions.keys.toList();
       for (final topic in topics) {
         final requestId = _nextRequestId();
-        _waitForAck<bool>(requestId, (_) => true).catchError((_) {});
+        _waitForAck<bool>(requestId, (_) => true).catchError((_) => false);
         _sendEnvelope({
           "type": "subscribe",
           "topic": topic,
@@ -334,7 +334,7 @@ class PubSubService extends BaseService {
       return;
     }
     final requestId = _nextRequestId();
-    _waitForAck<bool>(requestId, (_) => true).catchError((_) {});
+    _waitForAck<bool>(requestId, (_) => true).catchError((_) => false);
     await _sendEnvelope({
       "type": "unsubscribe",
       "topic": topic,

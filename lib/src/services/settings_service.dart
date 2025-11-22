@@ -155,7 +155,8 @@ class SettingsService extends BaseService {
   }
 
   // -------------------------------------------------------------------
-  // Application Configuration Helpers (Meta + TrustedProxy + RateLimits + Batch)
+  // Application Configuration Helpers
+  // (Meta + TrustedProxy + RateLimits + Batch)
   // -------------------------------------------------------------------
 
   /// Gets the current application configuration settings.
@@ -240,7 +241,8 @@ class SettingsService extends BaseService {
   // Mail-Specific Helpers (SMTP + Sender Info)
   // -------------------------------------------------------------------
 
-  /// Gets the current mail settings (both sender info from meta and SMTP configuration).
+  /// Gets the current mail settings (both sender info from meta and SMTP
+  /// configuration).
   ///
   /// This is a convenience method that returns both the sender information
   /// (meta) and SMTP configuration together, matching what's shown on the
