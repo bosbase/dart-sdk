@@ -23,6 +23,7 @@ import "services/cache_service.dart";
 import "services/langchaingo_service.dart";
 import "services/graphql_service.dart";
 import "services/pubsub_service.dart";
+import "services/sql_service.dart";
 
 const bool isWeb = bool.fromEnvironment("dart.library.js_util");
 
@@ -93,6 +94,9 @@ class Bosbase {
   /// An instance of the service that handles the **WebSocket pub/sub APIs**.
   late final PubSubService pubsub;
 
+  /// The service that handles the **SQL execution APIs**.
+  late final SQLService sql;
+
   /// The underlying http client that will be used to send the request.
   /// This is used primarily for the unit tests.
   late final http.Client Function() httpClientFactory;
@@ -142,6 +146,7 @@ class Bosbase {
     langchaingo = LangChaingoService(this);
     caches = CacheService(this);
     graphql = GraphQLService(this);
+    sql = SQLService(this);
     pubsub = PubSubService(this);
   }
 

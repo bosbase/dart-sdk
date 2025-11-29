@@ -573,6 +573,7 @@ The SDK provides full access to all backend management capabilities:
 - **BackupService** - Create, list, upload, delete, and restore backups
 - **LogService** - Query and analyze application logs with statistics
 - **CronService** - List and manually execute cron jobs
+- **SQLService** - Execute ad-hoc SQL statements against the underlying database
 - **HealthService** - Check API health status
 
 All management operations require superuser authentication (🔐).
@@ -616,6 +617,19 @@ All management operations require superuser authentication (🔐).
 ```
 
 > 📖 **Vector Database Documentation**: See [VECTOR_API.md](./VECTOR_API.md) for comprehensive vector operations guide, examples, and best practices.
+
+---
+
+#### SQLService ([Detailed class reference](https://pub.dev/documentation/bosbase/latest/bosbase/SQLService-class.html))
+
+```dart
+// Execute a SQL statement (superuser only).
+🔐 final result = await pb.sql.execute("SELECT id, email FROM users LIMIT 5");
+
+print(result.columns);      // ['id', 'email']
+print(result.rows);         // [['row-id', 'user@example.com']]
+print(result.rowsAffected); // null for SELECT statements
+```
 
 ---
 

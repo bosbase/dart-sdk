@@ -41,6 +41,7 @@ export "src/dtos/record_auth.dart";
 export "src/dtos/record_model.dart";
 export "src/dtos/record_subscription_event.dart";
 export "src/dtos/result_list.dart";
+export "src/dtos/sql_execute.dart";
 export "src/dtos/token_config.dart";
 export "src/dtos/vector_document.dart";
 
@@ -57,6 +58,7 @@ export "src/services/log_service.dart";
 export "src/services/realtime_service.dart";
 export "src/services/record_service.dart";
 export "src/services/settings_service.dart";
+export "src/services/sql_service.dart";
 export "src/services/vector_service.dart";
 export "src/services/llm_document_service.dart";
 export "src/services/langchaingo_service.dart";

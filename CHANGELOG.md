@@ -1,3 +1,9 @@
+## 0.23.5
+
+- Added `SQLService.execute()` to run superuser-only SQL statements via `/api/sql/execute` (parity with JS SDK).
+- Added `SQLExecuteResponse` DTO and public exports.
+- Added SQL service documentation snippet and tests.
+
 ## 0.23.4
 
 - Fixed argument type error in `pubsub_service.dart`: added explicit cast from `dynamic` to `Object` for error handler.
