@@ -57,6 +57,9 @@ class SseClient {
   /// Callback function that is triggered on each error connect attempt.
   late final void Function(dynamic err)? _onError;
 
+  /// Custom headers to send with the SSE request.
+  late final Map<String, String> _headers;
+
   /// The local streamed http response subscription.
   StreamSubscription<String>? _responseStreamSubscription;
 
@@ -77,6 +80,7 @@ class SseClient {
     num maxRetry = double.infinity,
     void Function()? onClose,
     void Function(dynamic err)? onError,
+    Map<String, String> headers = const {},
 
     /// The underlying http client that will be used to send the request.
     /// This is used primarily for the unit tests.
@@ -85,6 +89,7 @@ class SseClient {
     _maxRetry = maxRetry;
     _onClose = onClose;
     _onError = onError;
+    _headers = Map<String, String>.of(headers);
     _httpClient = httpClientFactory?.call() ?? http.Client();
     _init();
   }
@@ -124,6 +129,9 @@ class SseClient {
 
     final url = Uri.parse(_url);
     final request = http.Request("GET", url);
+    if (_headers.isNotEmpty) {
+      request.headers.addAll(_headers);
+    }
     try {
       final response = await _httpClient.send(request);
 

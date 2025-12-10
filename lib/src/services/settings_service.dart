@@ -118,7 +118,8 @@ class SettingsService extends BaseService {
 
   /// Gets a specific settings category.
   ///
-  /// [category] - The settings category name (meta, smtp, s3, backups, batch, rateLimits, trustedProxy, logs)
+  /// [category] - The settings category name (meta, smtp, s3, backups, batch,
+  /// rateLimits, trustedProxy, logs)
   /// Returns the settings category object or null if not found
   Future<Map<String, dynamic>?> getCategory(
     String category, {

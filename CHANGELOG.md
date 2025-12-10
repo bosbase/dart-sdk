@@ -1,3 +1,17 @@
+## 0.25.0
+
+- Aligned changelog with package version and bumped to 0.25.0.
+- Fixed `PluginService` SSE/WebSocket handling (removed bad headers param, safer query merge).
+- Sorted public exports and cleaned minor lints for analyzer parity.
+
+## 0.24.0
+
+- Added `ScriptService` and `ScriptPermissionsService` for managing scripts and their execution permissions (parity with JS SDK).
+- Added `RedisService` for Redis key helpers and `PluginService` for forwarding plugin HTTP/SSE/WebSocket requests.
+- Exported script DTOs and new services through `bosbase.dart` and initialized them on the client.
+- Allow custom headers when creating `SseClient` connections (used by plugin SSE requests).
+- Synced dart `doc/` contents with the JS SDK documentation set.
+
 ## 0.23.5
 
 - Added `SQLService.execute()` to run superuser-only SQL statements via `/api/sql/execute` (parity with JS SDK).

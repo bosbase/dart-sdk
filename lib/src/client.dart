@@ -23,6 +23,10 @@ import "services/cache_service.dart";
 import "services/langchaingo_service.dart";
 import "services/graphql_service.dart";
 import "services/pubsub_service.dart";
+import "services/plugin_service.dart";
+import "services/redis_service.dart";
+import "services/script_permissions_service.dart";
+import "services/script_service.dart";
 import "services/sql_service.dart";
 
 const bool isWeb = bool.fromEnvironment("dart.library.js_util");
@@ -88,6 +92,18 @@ class Bosbase {
   /// The service that handles the **Cache APIs**.
   late final CacheService caches;
 
+  /// The service that proxies plugin requests.
+  late final PluginService plugins;
+
+  /// The service that handles the **Redis APIs**.
+  late final RedisService redis;
+
+  /// The service that handles the **Scripts APIs**.
+  late final ScriptService scripts;
+
+  /// The service that handles the **Script Permissions APIs**.
+  late final ScriptPermissionsService scriptsPermissions;
+
   /// The service that handles GraphQL queries and mutations.
   late final GraphQLService graphql;
 
@@ -145,6 +161,10 @@ class Bosbase {
     llmDocuments = LLMDocumentService(this);
     langchaingo = LangChaingoService(this);
     caches = CacheService(this);
+    plugins = PluginService(this);
+    redis = RedisService(this);
+    scripts = ScriptService(this);
+    scriptsPermissions = ScriptPermissionsService(this);
     graphql = GraphQLService(this);
     sql = SQLService(this);
     pubsub = PubSubService(this);
