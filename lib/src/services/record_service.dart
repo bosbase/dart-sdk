@@ -276,6 +276,81 @@ class RecordService extends BaseCrudService<RecordModel> {
         .then(_authResponse);
   }
 
+  /// Bind a custom token to an auth record after verifying credentials.
+  Future<void> bindCustomToken(
+    String email,
+    String password,
+    String token, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+    enrichedBody["email"] = email;
+    enrichedBody["password"] = password;
+    enrichedBody["token"] = token;
+
+    return client.send(
+      "$baseCollectionPath/bind-token",
+      method: "POST",
+      body: enrichedBody,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Remove a previously bound custom token after verifying credentials.
+  Future<void> unbindCustomToken(
+    String email,
+    String password,
+    String token, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+    enrichedBody["email"] = email;
+    enrichedBody["password"] = password;
+    enrichedBody["token"] = token;
+
+    return client.send(
+      "$baseCollectionPath/unbind-token",
+      method: "POST",
+      body: enrichedBody,
+      query: query,
+      headers: headers,
+    );
+  }
+
+  /// Authenticate an auth record using a previously bound custom token.
+  ///
+  /// On success this method automatically updates the client's AuthStore.
+  Future<RecordAuth> authWithToken(
+    String token, {
+    String? expand,
+    String? fields,
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+    enrichedBody["token"] = token;
+
+    final enrichedQuery = Map<String, dynamic>.of(query);
+    enrichedQuery["expand"] ??= expand;
+    enrichedQuery["fields"] ??= fields;
+
+    return client
+        .send<Map<String, dynamic>>(
+          "$baseCollectionPath/auth-with-token",
+          method: "POST",
+          body: enrichedBody,
+          query: enrichedQuery,
+          headers: headers,
+        )
+        .then(_authResponse);
+  }
+
   /// Authenticate an auth record with an OAuth2 client provider and returns
   /// a new auth token and record data (including the OAuth2 user profile).
   ///

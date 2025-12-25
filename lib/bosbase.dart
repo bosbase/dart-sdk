@@ -43,6 +43,7 @@ export "src/dtos/record_subscription_event.dart";
 export "src/dtos/result_list.dart";
 export "src/dtos/script.dart";
 export "src/dtos/sql_execute.dart";
+export "src/dtos/sql_table.dart";
 export "src/dtos/token_config.dart";
 export "src/dtos/vector_document.dart";
 

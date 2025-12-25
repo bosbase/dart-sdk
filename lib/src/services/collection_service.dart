@@ -2,6 +2,7 @@ import "../client.dart";
 import "../dtos/collection_field.dart";
 import "../dtos/collection_model.dart";
 import "../dtos/collection_schema_info.dart";
+import "../dtos/sql_table.dart";
 import "base_crud_service.dart";
 
 /// The service that handles the **Collection APIs**.
@@ -227,6 +228,58 @@ class CollectionService extends BaseCrudService<CollectionModel> {
       query: query,
       headers: headers,
     );
+  }
+
+  /// Registers existing SQL tables and generates REST APIs for them.
+  ///
+  /// Only available to superusers.
+  Future<List<CollectionModel>> registerSqlTables(
+    List<String> tables, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+    enrichedBody["tables"] = tables;
+
+    return client
+        .send<List<dynamic>>(
+          "$baseCrudPath/sql/tables",
+          method: "POST",
+          body: enrichedBody,
+          query: query,
+          headers: headers,
+        )
+        .then((data) => data
+            .map((item) =>
+                CollectionModel.fromJson(item as Map<String, dynamic>? ?? {}))
+            .toList(growable: false));
+  }
+
+  /// Creates or registers SQL tables and maps them to collections.
+  ///
+  /// Tables with existing collections are skipped and returned in the `skipped`
+  /// list. Optional SQL statements are executed before registration.
+  ///
+  /// Only available to superusers.
+  Future<SqlTableImportResult> importSqlTables(
+    List<SqlTableDefinition> tables, {
+    Map<String, dynamic> body = const {},
+    Map<String, dynamic> query = const {},
+    Map<String, String> headers = const {},
+  }) {
+    final enrichedBody = Map<String, dynamic>.of(body);
+    enrichedBody["tables"] = tables.map((table) => table.toJson()).toList();
+
+    return client
+        .send<Map<String, dynamic>>(
+          "$baseCrudPath/sql/import",
+          method: "POST",
+          body: enrichedBody,
+          query: query,
+          headers: headers,
+        )
+        .then(SqlTableImportResult.fromJson);
   }
 
   // -------------------------------------------------------------------

@@ -4,6 +4,10 @@
 - Fixed `PluginService` SSE/WebSocket handling (removed bad headers param, safer query merge).
 - Sorted public exports and cleaned minor lints for analyzer parity.
 
+## 0.25.1
+
+- Bumped version to 0.25.1.
+
 ## 0.24.0
 
 - Added `ScriptService` and `ScriptPermissionsService` for managing scripts and their execution permissions (parity with JS SDK).
