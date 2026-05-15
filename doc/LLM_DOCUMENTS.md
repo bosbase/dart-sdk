@@ -1,6 +1,6 @@
 ## LLM Document API
 
-Chromem-go is embedded directly in BosBase and exposed via `/api/llm-documents`. The Dart SDK provides `LLMDocumentService` for interacting with these endpoints.
+Chromem-go is embedded directly in BosBase and exposed via `/api/llm-documents`, with persistence handled by PostgreSQL and the pgvector extension. The Dart SDK provides `LLMDocumentService` for interacting with these endpoints.
 
 ### Create Collections
 
